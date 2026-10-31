@@ -284,9 +284,10 @@ Returns the target page number, or null if the link is absent.
 The 960-byte `RawPage` is compressed with a simple run-length encoding (RLE) before base64url encoding, to satisfy REQ-7.4 (all-space page shorter than 960 characters).
 
 **RLE format (binary):**
-- Literal byte b (0x20 to 0x7F, non-control): emitted as-is.
-- Run of k identical bytes b: emitted as a two-byte sequence `0x01 b k` where k is 1–255.
-- The escape byte 0x01 within literal data is itself escaped as `0x01 0x01 1`.
+- Since pages contain 7-bit bytes (0x00 to 0x7F), byte 0x80 is free to use as the escape marker.
+- Literal byte b (any 7-bit value): emitted as-is.
+- Run of k identical bytes b: emitted as a three-byte sequence `0x80 b k` where k is 1–255.
+- If the byte to encode is 0x80, it would be encoded as a run (but 0x80 never appears in valid pages since they only use 7-bit bytes).
 
 After RLE, the byte sequence is base64url-encoded (RFC 4648 §5, no padding), yielding the characters `A–Z a–z 0–9 - _`. A version prefix character (`.`) is prepended so future format changes can be detected.
 
