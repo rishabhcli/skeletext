@@ -226,6 +226,7 @@ export interface TeletextController {
 const CSS = `
 .tt-root{max-width:min(100%,calc(100vh - 150px));margin:0 auto;font-family:system-ui,sans-serif;color:#ddd}
 .tt-screen{background:#000;line-height:0}
+.tt-sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:pre;border:0}
 .tt-bar{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;align-items:center}
 .tt-bar button{flex:1 1 56px;min-height:40px;border:0;border-radius:4px;font-weight:600;cursor:pointer;color:#000}
 .tt-bar button:focus-visible,.tt-bar input:focus-visible{outline:3px solid #fff;outline-offset:2px}
@@ -247,10 +248,13 @@ export function mountTeletext(element: HTMLElement, provider: PageProvider, opti
   root.className = 'tt-root';
   const screen = doc.createElement('div');
   screen.className = 'tt-screen';
-  screen.setAttribute('aria-live', 'polite');
   const bar = doc.createElement('div');
   bar.className = 'tt-bar';
-  root.append(screen, bar);
+  // Screen readers get the page as plain text. It is only updated when the page changes, never on the clock tick.
+  const transcript = doc.createElement('pre');
+  transcript.className = 'tt-sr';
+  transcript.setAttribute('aria-live', 'polite');
+  root.append(screen, transcript, bar);
   element.append(root);
 
   let state = initialState(options.initialPage ?? 100);
@@ -258,8 +262,18 @@ export function mountTeletext(element: HTMLElement, provider: PageProvider, opti
   const clock = options.clock ?? (() => new Date());
   const clockText = () => clock().toTimeString().slice(0, 8);
 
-  const draw = () => {
-    screen.innerHTML = renderSVG(interpretPage(screenPage(state, clockText(), indexPageOf(options)), state.reveal));
+  let announced = '';
+  const draw = (announce = true) => {
+    const cells = interpretPage(screenPage(state, clockText(), indexPageOf(options)), state.reveal);
+    screen.innerHTML = renderSVG(cells);
+    const key = `${state.status}|${state.page}|${state.sub}|${state.reveal}`;
+    if (announce && key !== announced) {
+      announced = key;
+      transcript.textContent = cells
+        .map((row) => row.map((c) => c.char).join('').trimEnd())
+        .filter((line) => line !== '')
+        .join('\n');
+    }
   };
 
   const dispatch = (event: ViewerEvent) => {
@@ -335,7 +349,7 @@ export function mountTeletext(element: HTMLElement, provider: PageProvider, opti
 
   const tickMs = (options.subpageSeconds ?? 8) * 1000;
   const stopCarousel = startCarousel(tickMs, () => dispatch({ type: 'tick' }));
-  const clockTimer = setInterval(draw, 1000);
+  const clockTimer = setInterval(() => draw(false), 1000);
 
   dispatch({ type: 'goto', page: state.page });
 
