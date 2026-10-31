@@ -33,7 +33,7 @@ Every message written to stdout SHALL be a single line terminated by exactly one
 
 ### Acceptance criteria
 
-- **REQ-2.1** The `initialize` response `result.capabilities.tools` is an array containing exactly the names `explain_code`, `render_page`, `validate_page`, and `encode_rows`.
+- **REQ-2.1** The `initialize` response `result.capabilities.tools` is an empty object `{}`, which is how MCP declares tool support. The four tool names `explain_code`, `render_page`, `validate_page` and `encode_rows` are returned by `tools/list`, and `tools/call` returns the tool result as one JSON text block in `result.content`. (Corrected on 2026-10-31: the first version of this requirement described a tool-name array, which is not the MCP wire format and would not work with Kiro.)
 - **REQ-2.2** The `initialize` response `result.serverInfo.name` is `teletext-mcp`.
 - **REQ-2.3** The `initialized` notification (a JSON-RPC message with no `id` field) produces no output line.
 

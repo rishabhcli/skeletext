@@ -1,0 +1,15 @@
+{
+  "name": "teletext-mcp",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "description": "MCP server that lets Kiro draw, validate and encode teletext pages",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json",
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@skeletext/core": "*"
+  }
+}

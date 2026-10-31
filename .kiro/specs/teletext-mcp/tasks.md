@@ -4,26 +4,28 @@ Implementation checklist for `tools/teletext-mcp/`. Each task is small and indep
 
 Tasks are ordered so that the escape expander and tool handlers are implemented before the dispatcher, and the dispatcher before the stdio loop.
 
+> Status note (2026-10-31): this package was written by hand, not by Kiro, because the free Kiro credits were used up; it follows the spec above with the REQ-2.1 correction. A real stdio session (initialize, tools/list, tools/call) was run against dist/server.js. See docs/HOW-KIRO-WAS-USED.md.
+
 ---
 
 ## Phase 0 — Project scaffold
 
-- [ ] **T-0.1** Create `tools/teletext-mcp/package.json` with `name: "teletext-mcp"`, `type: "module"`, a `bin` entry pointing to `dist/main.js`, and devDependencies for `vitest` and `fast-check`. Add `@skeletext/core` as a runtime dependency (not a devDependency).
-- [ ] **T-0.2** Create `tools/teletext-mcp/tsconfig.json` with `strict: true`, `target: "ES2022"`, `module: "NodeNext"`, `moduleResolution: "NodeNext"`, `outDir: "dist"`.
-- [ ] **T-0.3** Add a `vitest.config.ts` at `tools/teletext-mcp/` root covering `tools/teletext-mcp/test/**/*.test.ts`.
+- [x] **T-0.1** Create `tools/teletext-mcp/package.json` with `name: "teletext-mcp"`, `type: "module"`, a `bin` entry pointing to `dist/main.js`, and devDependencies for `vitest` and `fast-check`. Add `@skeletext/core` as a runtime dependency (not a devDependency).
+- [x] **T-0.2** Create `tools/teletext-mcp/tsconfig.json` with `strict: true`, `target: "ES2022"`, `module: "NodeNext"`, `moduleResolution: "NodeNext"`, `outDir: "dist"`.
+- [x] **T-0.3** Add a `vitest.config.ts` at `tools/teletext-mcp/` root covering `tools/teletext-mcp/test/**/*.test.ts`.
 
 ---
 
 ## Phase 1 — Shared types
 
-- [ ] **T-1.1** Implement `tools/teletext-mcp/src/types.ts`: define and export `JsonRpcRequest`, `JsonRpcNotification`, `JsonRpcSuccess`, `JsonRpcError`, `ExplainResult`, `RenderResult`, `RowAttributes`, `ValidateResult`, `Violation`, `EncodeResult`, `InvalidParamsError`, and `EscapeError` as described in design §3. No logic; no tests needed for types alone.
+- [x] **T-1.1** Implement `tools/teletext-mcp/src/types.ts`: define and export `JsonRpcRequest`, `JsonRpcNotification`, `JsonRpcSuccess`, `JsonRpcError`, `ExplainResult`, `RenderResult`, `RowAttributes`, `ValidateResult`, `Violation`, `EncodeResult`, `InvalidParamsError`, and `EscapeError` as described in design §3. No logic; no tests needed for types alone.
 
 ---
 
 ## Phase 2 — Escape expansion (`escape.ts`) — REQ-4, REQ-5, REQ-6
 
-- [ ] **T-2.1** Implement `expandEscapes` and `buildPage` in `tools/teletext-mcp/src/escape.ts` as described in design §6. `buildPage` calls `createPage` and `setCell` from `@skeletext/core`.
-- [ ] **T-2.2** Write `tools/teletext-mcp/test/escape.test.ts`:
+- [x] **T-2.1** Implement `expandEscapes` and `buildPage` in `tools/teletext-mcp/src/escape.ts` as described in design §6. `buildPage` calls `createPage` and `setCell` from `@skeletext/core`.
+- [x] **T-2.2** Write `tools/teletext-mcp/test/escape.test.ts`:
   - Unit: `expandEscapes('ABC')` returns `Uint8Array([65, 66, 67])`.
   - Unit: `expandEscapes('\\x0D')` returns `Uint8Array([13])`.
   - Unit: `expandEscapes('\\x41\\x42')` returns `Uint8Array([65, 66])` (hex for `A`, `B`).
@@ -38,8 +40,8 @@ Tasks are ordered so that the escape expander and tool handlers are implemented 
 
 ## Phase 3 — Tool: `explain_code` (`tools/explain.ts`) — REQ-3
 
-- [ ] **T-3.1** Implement `handleExplain` in `tools/teletext-mcp/src/tools/explain.ts` using `CONTROL_CODES` from `@skeletext/core`.
-- [ ] **T-3.2** Write `tools/teletext-mcp/test/tools/explain.test.ts`:
+- [x] **T-3.1** Implement `handleExplain` in `tools/teletext-mcp/src/tools/explain.ts` using `CONTROL_CODES` from `@skeletext/core`.
+- [x] **T-3.2** Write `tools/teletext-mcp/test/tools/explain.test.ts`:
   - Unit: `handleExplain({ byte: 13 })` returns `{ byte: "0x0D", name: "Double Height", timing: "set-after", noEffect: false }` (REQ-3.1).
   - Unit: `handleExplain({ byte: 25 })` returns `{ ..., timing: "set-at" }` (REQ-3.2).
   - Unit: `handleExplain({ byte: 32 })` returns `{ name: "printable", timing: "n/a", noEffect: false }` (REQ-3.3).
@@ -54,8 +56,8 @@ Tasks are ordered so that the escape expander and tool handlers are implemented 
 
 ## Phase 4 — Tool: `render_page` (`tools/render.ts`) — REQ-4
 
-- [ ] **T-4.1** Implement `handleRender` in `tools/teletext-mcp/src/tools/render.ts` using `decode` and `interpretPage` from `@skeletext/core` and `buildPage` from `escape.ts`.
-- [ ] **T-4.2** Write `tools/teletext-mcp/test/tools/render.test.ts`:
+- [x] **T-4.1** Implement `handleRender` in `tools/teletext-mcp/src/tools/render.ts` using `decode` and `interpretPage` from `@skeletext/core` and `buildPage` from `escape.ts`.
+- [x] **T-4.2** Write `tools/teletext-mcp/test/tools/render.test.ts`:
   - Unit: `handleRender({ rows: Array(24).fill(' '.repeat(40)) })` returns a `drawing` of 24 lines each being 40 spaces (REQ-4.1).
   - Unit: the `drawing` field always contains exactly 23 `\n` characters (24 lines joined by `\n`).
   - Unit: `handleRender({ rows: Array(23).fill('') })` throws `InvalidParamsError` (only 23 rows, REQ-4.5).
@@ -70,8 +72,8 @@ Tasks are ordered so that the escape expander and tool handlers are implemented 
 
 ## Phase 5 — Tool: `validate_page` (`tools/validate.ts`) — REQ-5
 
-- [ ] **T-5.1** Implement `handleValidate` in `tools/teletext-mcp/src/tools/validate.ts` using `buildPage` and `expandEscapes` from `escape.ts`. All internal errors MUST be caught and returned as violations, not re-thrown.
-- [ ] **T-5.2** Write `tools/teletext-mcp/test/tools/validate.test.ts`:
+- [x] **T-5.1** Implement `handleValidate` in `tools/teletext-mcp/src/tools/validate.ts` using `buildPage` and `expandEscapes` from `escape.ts`. All internal errors MUST be caught and returned as violations, not re-thrown.
+- [x] **T-5.2** Write `tools/teletext-mcp/test/tools/validate.test.ts`:
   - Unit: a page with 0x0D on row 23 returns a violation `{ rule: "double-height-on-row-23", row: 23 }` (REQ-5.1).
   - Unit: a page with 0x0B on row 5, col 10 returns a violation `{ rule: "start-box-on-normal-page", row: 5, col: 10 }` (REQ-5.2).
   - Unit: `handleValidate({ rows: [...24 rows where one is 41 chars long...] })` returns a `row-too-long` violation (REQ-5.3).
@@ -83,8 +85,8 @@ Tasks are ordered so that the escape expander and tool handlers are implemented 
 
 ## Phase 6 — Tool: `encode_rows` (`tools/encode.ts`) — REQ-6
 
-- [ ] **T-6.1** Implement `handleEncode` in `tools/teletext-mcp/src/tools/encode.ts` using `buildPage` from `escape.ts` and `encode`/`decode` from `@skeletext/core`.
-- [ ] **T-6.2** Write `tools/teletext-mcp/test/tools/encode.test.ts`:
+- [x] **T-6.1** Implement `handleEncode` in `tools/teletext-mcp/src/tools/encode.ts` using `buildPage` from `escape.ts` and `encode`/`decode` from `@skeletext/core`.
+- [x] **T-6.2** Write `tools/teletext-mcp/test/tools/encode.test.ts`:
   - Unit: `handleEncode({ rows: Array(24).fill(' '.repeat(40)) })` returns `{ encoded: <string>, byteCount: 0 }`.
   - Unit: `decode(result.encoded)` for the above equals a 960-byte page of all 0x20 (REQ-6.1).
   - Unit: `handleEncode({ rows: Array(23).fill('') })` throws `InvalidParamsError` (REQ-6.4).
@@ -97,8 +99,8 @@ Tasks are ordered so that the escape expander and tool handlers are implemented 
 
 ## Phase 7 — MCP handshake (`handshake.ts`) — REQ-2
 
-- [ ] **T-7.1** Implement `handleInitialize` and `handleToolsList` in `tools/teletext-mcp/src/handshake.ts` as described in design §5.
-- [ ] **T-7.2** Write `tools/teletext-mcp/test/handshake.test.ts`:
+- [x] **T-7.1** Implement `handleInitialize` and `handleToolsList` in `tools/teletext-mcp/src/handshake.ts` as described in design §5.
+- [x] **T-7.2** Write `tools/teletext-mcp/test/handshake.test.ts`:
   - Unit: `handleInitialize` response has `result.serverInfo.name === 'teletext-mcp'` (REQ-2.2).
   - Unit: `handleToolsList` response lists exactly `['explain_code', 'render_page', 'validate_page', 'encode_rows']` as tool names (REQ-2.1).
   - Unit: each tool descriptor has `name`, `description`, and `inputSchema` fields.
@@ -107,8 +109,8 @@ Tasks are ordered so that the escape expander and tool handlers are implemented 
 
 ## Phase 8 — Method dispatcher (`dispatch.ts`)
 
-- [ ] **T-8.1** Implement `defaultDispatch` in `tools/teletext-mcp/src/dispatch.ts` routing `initialize`, `tools/list`, `tools/call`, and unknown methods as described in design §11.
-- [ ] **T-8.2** Write `tools/teletext-mcp/test/dispatch.test.ts`:
+- [x] **T-8.1** Implement `defaultDispatch` in `tools/teletext-mcp/src/dispatch.ts` routing `initialize`, `tools/list`, `tools/call`, and unknown methods as described in design §11.
+- [x] **T-8.2** Write `tools/teletext-mcp/test/dispatch.test.ts`:
   - Unit: dispatching `initialize` returns a success response with `result.serverInfo.name === 'teletext-mcp'`.
   - Unit: dispatching `tools/list` returns a success response listing the four tools.
   - Unit: dispatching `tools/call` with `name: 'explain_code'` and `arguments: { byte: 7 }` returns a success response.
@@ -120,8 +122,8 @@ Tasks are ordered so that the escape expander and tool handlers are implemented 
 
 ## Phase 9 — JSON-RPC 2.0 stdio loop (`rpc.ts`) — REQ-1
 
-- [ ] **T-9.1** Implement `startServer` and `writeResponse` in `tools/teletext-mcp/src/rpc.ts` using `readline.createInterface` on `process.stdin`. Export `startServer` so tests can inject a mock dispatch and mock streams.
-- [ ] **T-9.2** Write `tools/teletext-mcp/test/rpc.test.ts` using mock `Readable`/`Writable` streams (no child processes):
+- [x] **T-9.1** Implement `startServer` and `writeResponse` in `tools/teletext-mcp/src/rpc.ts` using `readline.createInterface` on `process.stdin`. Export `startServer` so tests can inject a mock dispatch and mock streams.
+- [x] **T-9.2** Write `tools/teletext-mcp/test/rpc.test.ts` using mock `Readable`/`Writable` streams (no child processes):
   - Unit: a well-formed JSON-RPC request produces one line of JSON output (REQ-1.1).
   - Unit: the output line is valid JSON and has `jsonrpc === "2.0"`.
   - Unit: a non-JSON line produces a Parse error response with `error.code === -32700` (REQ-1.2).
@@ -134,13 +136,13 @@ Tasks are ordered so that the escape expander and tool handlers are implemented 
 
 ## Phase 10 — Entry point (`main.ts`)
 
-- [ ] **T-10.1** Implement `tools/teletext-mcp/src/main.ts` as described in design §12: call `startServer(defaultDispatch)`. No tests needed for the entry point; integration is verified by running the compiled binary.
+- [x] **T-10.1** Implement `tools/teletext-mcp/src/main.ts` as described in design §12: call `startServer(defaultDispatch)`. No tests needed for the entry point; integration is verified by running the compiled binary.
 
 ---
 
 ## Phase 11 — Integration
 
-- [ ] **T-11.1** Run `vitest run` for `tools/teletext-mcp/` and confirm all tests pass with zero failures.
-- [ ] **T-11.2** Run `tsc` and confirm zero TypeScript errors and a `dist/main.js` is produced.
-- [ ] **T-11.3** Run `echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | node dist/main.js` and confirm the output is a valid JSON-RPC response with `result.serverInfo.name === "teletext-mcp"`.
-- [ ] **T-11.4** Run a `tools/call` for `explain_code` with `{ "byte": 13 }` via stdin and confirm the response text contains `"Double Height"`.
+- [x] **T-11.1** Run `vitest run` for `tools/teletext-mcp/` and confirm all tests pass with zero failures.
+- [x] **T-11.2** Run `tsc` and confirm zero TypeScript errors and a `dist/main.js` is produced.
+- [x] **T-11.3** Run `echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | node dist/main.js` and confirm the output is a valid JSON-RPC response with `result.serverInfo.name === "teletext-mcp"`.
+- [x] **T-11.4** Run a `tools/call` for `explain_code` with `{ "byte": 13 }` via stdin and confirm the response text contains `"Double Height"`.
