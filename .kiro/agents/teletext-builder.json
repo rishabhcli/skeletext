@@ -1,0 +1,38 @@
+{
+  "name": "teletext-builder",
+  "description": "Builds the skeletext skeleton and apps one spec task at a time.",
+  "prompt": "file://./teletext-builder.md",
+  "tools": ["read", "write", "shell"],
+  "mcpServers": {
+    "teletext": {
+      "command": "node",
+      "args": ["tools/teletext-mcp/dist/server.js"]
+    }
+  },
+  "permissions": {
+    "rules": [
+      { "capability": "shell", "match": ["npm *"], "effect": "allow" },
+      { "capability": "shell", "match": ["npx *"], "effect": "allow" },
+      { "capability": "shell", "match": ["node *"], "effect": "allow" },
+      { "capability": "shell", "match": ["git status*"], "effect": "allow" },
+      { "capability": "shell", "match": ["git diff*"], "effect": "allow" },
+      { "capability": "shell", "match": ["ls*"], "effect": "allow" },
+      { "capability": "shell", "match": ["cat *"], "effect": "allow" },
+      { "capability": "fs_write", "match": ["skeleton/**"], "effect": "allow" },
+      { "capability": "fs_write", "match": ["apps/**"], "effect": "allow" },
+      { "capability": "fs_write", "match": ["tools/**"], "effect": "allow" },
+      { "capability": "fs_write", "match": ["docs/**"], "effect": "allow" },
+      { "capability": "fs_write", "match": [".kiro/specs/**"], "effect": "allow" },
+      { "capability": "shell", "match": ["rm -rf *"], "effect": "deny" },
+      { "capability": "shell", "match": ["sudo *"], "effect": "deny" },
+      { "capability": "shell", "match": ["git push*"], "effect": "deny" },
+      { "capability": "shell", "match": ["curl * | *sh*"], "effect": "deny" },
+      { "capability": "shell", "match": ["curl * | *bash*"], "effect": "deny" }
+    ]
+  },
+  "resources": [
+    "file://.kiro/steering/*.md",
+    "file://docs/ets300706-level1-reference.md",
+    "file://.kiro/specs/**/*.md"
+  ]
+}

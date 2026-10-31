@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "pbt-on-save",
+      "description": "Run the skeleton property-based tests whenever a TypeScript source file under skeleton/src is saved.",
+      "trigger": "PostFileSave",
+      "matcher": "skeleton/src/.*\\.ts$",
+      "action": {
+        "type": "command",
+        "command": "npm test --workspace skeleton"
+      }
+    }
+  ]
+}

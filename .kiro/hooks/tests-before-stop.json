@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "tests-before-stop",
+      "description": "Run the full test suite before the agent stops. If any tests fail, emit a continue decision so the agent keeps working.",
+      "trigger": "Stop",
+      "action": {
+        "type": "command",
+        "command": ".kiro/hooks/scripts/tests-before-stop.sh"
+      }
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "protect-reference",
+      "description": "Block any write to docs/ets300706-level1-reference.md. That file is read-only.",
+      "trigger": "PreToolUse",
+      "matcher": "write",
+      "action": {
+        "type": "command",
+        "command": ".kiro/hooks/scripts/protect-reference.sh"
+      }
+    }
+  ]
+}

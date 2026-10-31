@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "teletext": {
+      "command": "node",
+      "args": ["tools/teletext-mcp/dist/server.js"],
+      "timeout": 30000
+    }
+  }
+}
