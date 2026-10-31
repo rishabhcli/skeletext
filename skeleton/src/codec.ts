@@ -25,7 +25,7 @@ function rleEncode(page: RawPage): Uint8Array {
   
   let i = 0;
   while (i < page.length) {
-    const byte = page[i];
+    const byte = page[i] as number;
     let count = 1;
     
     // Count consecutive identical bytes
@@ -54,21 +54,27 @@ function rleDecode(data: Uint8Array, expectedLength: number): RawPage {
   let i = 0;
   
   while (i < data.length && outIdx < expectedLength) {
-    const byte = data[i];
+    const byte = data[i] as number;
     
     if (byte === 0x80) {
       // Run: next byte is value, then count
       if (i + 2 >= data.length) {
         throw new CodecError('Invalid RLE: incomplete run at end');
       }
-      const value = data[i + 1];
+      const value = data[i + 1] as number;
       const count = data[i + 2] as number;
+      if (value > 0x7f || count === 0) {
+        throw new CodecError('Invalid RLE: bad run');
+      }
       for (let j = 0; j < count && outIdx < expectedLength; j++) {
         result[outIdx++] = value;
       }
       i += 3;
     } else {
       // Literal byte
+      if (byte > 0x7f) {
+        throw new CodecError('Invalid RLE: byte outside 7-bit range');
+      }
       result[outIdx++] = byte;
       i++;
     }
@@ -98,10 +104,10 @@ export function encode(page: RawPage): string {
     const b3 = i + 2 < rleData.length ? rleData[i + 2] as number : 0;
     
     const chunk = (b1 << 16) | (b2 << 8) | b3;
-    result += BASE64_URL[(chunk >> 18) & 0x3F];
-    result += BASE64_URL[(chunk >> 12) & 0x3F];
-    result += BASE64_URL[(chunk >> 6) & 0x3F];
-    result += BASE64_URL[chunk & 0x3F];
+    result += BASE64_URL[(chunk >> 18) & 0x3F] ?? '';
+    result += BASE64_URL[(chunk >> 12) & 0x3F] ?? '';
+    result += BASE64_URL[(chunk >> 6) & 0x3F] ?? '';
+    result += BASE64_URL[chunk & 0x3F] ?? '';
   }
   
   return result;

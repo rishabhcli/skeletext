@@ -32,6 +32,6 @@ The following are loaded as resources and available at all times:
 
 - `.kiro/steering/*.md` — product, tech and structure steering
 - `docs/ets300706-level1-reference.md` — Level 1 control code facts and grid definition
-- `.kiro/specs/**/*.md` — requirements, design and task files for every feature
+- The spec you are asked to implement is NOT preloaded to save credits: read only the requirements.md, design.md and tasks.md of that one spec with the read tool.
 
 When in doubt about a control code value or grid behaviour, read the reference document rather than guessing.

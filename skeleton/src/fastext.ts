@@ -39,9 +39,17 @@ export function fillPromptRow(config: FastextConfig, labels: FastextLabels): Uin
     row[start] = zone.byte;
     
     // Write label text, padded to 9 chars (total 10 bytes including colour byte)
-    const labelBytes = zone.label.slice(0, 9).padEnd(9, ' ').split('').map(c => c.charCodeAt(0));
+    // Labels are reduced to printable ASCII so a label can never add control codes.
+    const labelBytes = zone.label
+      .slice(0, 9)
+      .padEnd(9, ' ')
+      .split('')
+      .map((c) => {
+        const code = c.charCodeAt(0);
+        return code >= 0x20 && code <= 0x7e ? code : 0x3f;
+      });
     for (let j = 0; j < labelBytes.length; j++) {
-      row[start + 1 + j] = labelBytes[j];
+      row[start + 1 + j] = labelBytes[j] ?? 0x20;
     }
   }
   

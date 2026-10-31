@@ -37,11 +37,35 @@ export function addPage(store: PageStore, number: number, subpages: RawPage[], f
   }
   return {
     ...store,
-    pages: store.pages.set(number, { number, subpages, fastext }),
+    pages: new Map(store.pages).set(number, { number, subpages, fastext }),
   };
 }
 
-// Navigate to the next page
+/** Next page number, wrapping from 899 to 100. */
+export function nextPageNumber(n: number): number {
+  if (!isValidPageNumber(n)) throw new RangeError(`Page number out of range: ${n}`);
+  return n === 899 ? 100 : n + 1;
+}
+
+/** Previous page number, wrapping from 100 to 899. */
+export function prevPageNumber(n: number): number {
+  if (!isValidPageNumber(n)) throw new RangeError(`Page number out of range: ${n}`);
+  return n === 100 ? 899 : n - 1;
+}
+
+/**
+ * Neighbour of a page number in a direction. When `available` is given only those
+ * page numbers are visited, wrapping around; otherwise every number from 100 to 899.
+ */
+export function neighbourPage(n: number, direction: 1 | -1, available?: readonly number[]): number {
+  if (!available || available.length === 0) return direction === 1 ? nextPageNumber(n) : prevPageNumber(n);
+  const sorted = [...new Set(available.filter(isValidPageNumber))].sort((a, b) => a - b);
+  if (sorted.length === 0) return direction === 1 ? nextPageNumber(n) : prevPageNumber(n);
+  if (direction === 1) return sorted.find((x) => x > n) ?? (sorted[0] as number);
+  return [...sorted].reverse().find((x) => x < n) ?? (sorted[sorted.length - 1] as number);
+}
+
+// Navigate to the next stored page
 export function nextPage(store: PageStore): PageStore {
   const numbers = Array.from(store.pages.keys()).sort((a, b) => a - b);
   if (numbers.length === 0) {
@@ -49,7 +73,7 @@ export function nextPage(store: PageStore): PageStore {
   }
   const idx = numbers.indexOf(store.currentPage);
   const nextIdx = (idx + 1) % numbers.length;
-  const nextNum = numbers[nextIdx];
+  const nextNum = numbers[nextIdx] ?? store.currentPage;
   return {
     ...store,
     currentPage: nextNum,
@@ -65,7 +89,7 @@ export function prevPage(store: PageStore): PageStore {
   }
   const idx = numbers.indexOf(store.currentPage);
   const prevIdx = (idx - 1 + numbers.length) % numbers.length;
-  const prevNum = numbers[prevIdx];
+  const prevNum = numbers[prevIdx] ?? store.currentPage;
   return {
     ...store,
     currentPage: prevNum,

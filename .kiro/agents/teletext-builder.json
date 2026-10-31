@@ -147,7 +147,6 @@
   },
   "resources": [
     "file://.kiro/steering/*.md",
-    "file://docs/ets300706-level1-reference.md",
-    "file://.kiro/specs/**/*.md"
+    "file://docs/ets300706-level1-reference.md"
   ]
 }
