@@ -45,3 +45,12 @@ export { encode, decode, CodecError } from './codec.js';
 
 // SVG renderer
 export { renderSVG, escapeXml, PALETTE, CELL_W, CELL_H, SVG_W, SVG_H } from './renderer.js';
+
+// Page composition and system pages
+export type { TextOptions } from './builder.js';
+export { PageBuilder, wrapText, toAscii } from './builder.js';
+export { makeNotFoundPage, makeErrorPage, makeLoadingPage } from './system-pages.js';
+
+// Viewer
+export type { ProvidedPage, PageProvider, ViewerAction, ViewerStatus, ViewerState, ViewerEvent, ViewerOptions, TeletextController } from './viewer.js';
+export { mapKey, reduce, initialState, startCarousel, decorate, screenPage, indexPageOf, mountTeletext } from './viewer.js';

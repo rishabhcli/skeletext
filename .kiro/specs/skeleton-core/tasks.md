@@ -4,6 +4,8 @@ Implementation checklist for the `skeleton/` package. Each task is small and ind
 
 Tasks are ordered so that each module can be implemented and tested before the modules that depend on it.
 
+> Status note (2026-10-31): Phases 0 to 4 and the first versions of Phases 6 to 8 were implemented by Kiro. Phase 5 (interpreter) was rewritten by hand after review, Phase 9 (renderer), 10 and 14 (viewer) and 13 and 15 (builder, system pages) were written by hand because the free Kiro credits ran out, and Phases 6 to 8 received hand fixes. See docs/HOW-KIRO-WAS-USED.md.
+
 ---
 
 ## Phase 0 — Project scaffold
@@ -85,18 +87,18 @@ Tasks are ordered so that each module can be implemented and tested before the m
 
 ## Phase 6 — Page store and router (`store.ts`) — REQ-5
 
-- [ ] **T-6.1** Implement `createStore`, `nextPage`, `prevPage`, `goToPage` in `skeleton/src/store.ts`. Page numbers outside 100–899 are rejected.
-- [ ] **T-6.2** Write `skeleton/test/store.test.ts` for navigation:
+- [x] **T-6.1** Implement `createStore`, `nextPage`, `prevPage`, `goToPage` in `skeleton/src/store.ts`. Page numbers outside 100–899 are rejected.
+- [x] **T-6.2** Write `skeleton/test/store.test.ts` for navigation:
   - Unit: `goToPage` with n < 100 or n > 899 throws.
   - **[PBT REQ-5.1.2]** `fc.integer({min:100,max:899})`: `nextPage` and `prevPage` always return a value in 100–899.
   - **[PBT REQ-5.1.3]** Same arbitrary n: `prevPage(nextPage(n))` === n and `nextPage(prevPage(n))` === n.
-- [ ] **T-6.3** Implement `enterDigit` digit-entry state machine in `skeleton/src/store.ts`.
-- [ ] **T-6.4** Write tests for digit entry:
+- [x] **T-6.3** Implement `enterDigit` digit-entry state machine in `skeleton/src/store.ts`.
+- [x] **T-6.4** Write tests for digit entry:
   - Unit: one or two digits return navigate=null.
   - Unit: first digit 0 or 9 resets state and returns navigate=null (REQ-5.2.3).
   - **[PBT REQ-5.2.2]** `fc.integer({min:1,max:8})` × `fc.integer({min:0,max:9})` × `fc.integer({min:0,max:9})`: three-digit sequence produces a page in 100–899.
-- [ ] **T-6.5** Implement `tickCarousel` in `skeleton/src/store.ts`.
-- [ ] **T-6.6** Write tests for carousel:
+- [x] **T-6.5** Implement `tickCarousel` in `skeleton/src/store.ts`.
+- [x] **T-6.6** Write tests for carousel:
   - Unit: carousel wraps from last subpage back to 0.
   - **[PBT REQ-5.3.1]** `fc.integer({min:1,max:20})` subpages, `fc.integer({min:1,max:100})` ticks: subpage index is always in 0 to k−1.
 
@@ -104,8 +106,8 @@ Tasks are ordered so that each module can be implemented and tested before the m
 
 ## Phase 7 — Fastext (`fastext.ts`) — REQ-6
 
-- [ ] **T-7.1** Implement `fillPromptRow` and `handleFastextKey` in `skeleton/src/fastext.ts`.
-- [ ] **T-7.2** Write `skeleton/test/fastext.test.ts`:
+- [x] **T-7.1** Implement `fillPromptRow` and `handleFastextKey` in `skeleton/src/fastext.ts`.
+- [x] **T-7.2** Write `skeleton/test/fastext.test.ts`:
   - Unit: `handleFastextKey` with an absent link returns null (REQ-6.3).
   - Unit: the prompt row contains the four colour control bytes 0x01, 0x02, 0x03, 0x06 (REQ-6.2).
   - **[PBT REQ-6.1]** Arbitrary `FastextConfig`: `fillPromptRow` always returns exactly 40 bytes.
@@ -114,8 +116,8 @@ Tasks are ordered so that each module can be implemented and tested before the m
 
 ## Phase 8 — Codec (`codec.ts`) — REQ-7
 
-- [ ] **T-8.1** Implement `encode` and `decode` in `skeleton/src/codec.ts` using RLE then base64url.
-- [ ] **T-8.2** Write `skeleton/test/codec.test.ts`:
+- [x] **T-8.1** Implement `encode` and `decode` in `skeleton/src/codec.ts` using RLE then base64url.
+- [x] **T-8.2** Write `skeleton/test/codec.test.ts`:
   - Unit: `decode(encode(allSpacePage))` equals the original and the encoded length is less than 960 chars (REQ-7.4).
   - Unit: `decode` throws `CodecError` on an invalid string (REQ-7.3).
   - **[PBT REQ-7.1]** Arbitrary 960-byte page: `decode(encode(page))` is byte-for-byte identical to the original.
@@ -125,8 +127,8 @@ Tasks are ordered so that each module can be implemented and tested before the m
 
 ## Phase 9 — SVG renderer (`renderer.ts`) — REQ-8
 
-- [ ] **T-9.1** Implement `renderSVG` in `skeleton/src/renderer.ts` using string concatenation. Escape all text content characters `<`, `>`, `&`, `"`.
-- [ ] **T-9.2** Write `skeleton/test/renderer.test.ts`:
+- [x] **T-9.1** Implement `renderSVG` in `skeleton/src/renderer.ts` using string concatenation. Escape all text content characters `<`, `>`, `&`, `"`.
+- [x] **T-9.2** Write `skeleton/test/renderer.test.ts`:
   - Unit: output starts with `<svg` and ends with `</svg>`.
   - Unit: calling renderer twice with identical input produces identical output (REQ-8.2).
   - Unit: a flashing cell produces a `<g class="flash">` wrapper (REQ-8.3).
@@ -138,36 +140,36 @@ Tasks are ordered so that each module can be implemented and tested before the m
 
 ## Phase 10 — Browser viewer (`viewer.ts`) — REQ-9
 
-- [ ] **T-10.1** Implement `mapKey` as a pure function in `skeleton/src/viewer.ts` (REQ-9.3).
-- [ ] **T-10.2** Write `skeleton/test/viewer.test.ts` for `mapKey`:
+- [x] **T-10.1** Implement `mapKey` as a pure function in `skeleton/src/viewer.ts` (REQ-9.3).
+- [x] **T-10.2** Write `skeleton/test/viewer.test.ts` for `mapKey`:
   - Unit: digit keys '0'–'9' map to `{ type: 'digit', value: 0..9 }`.
   - Unit: colour key mappings produce the correct Fastext action.
   - Unit: an unmapped key returns null.
-- [ ] **T-10.3** Implement `startCarousel` returning a stop function (REQ-9.2). Test with Vitest fake timers:
+- [x] **T-10.3** Implement `startCarousel` returning a stop function (REQ-9.2). Test with Vitest fake timers:
   - Unit: `onTick` is called the correct number of times after n intervals.
   - Unit: calling the stop function prevents further calls.
-- [ ] **T-10.4** Implement the top-level viewer wiring (keyboard listener, carousel setup, reveal toggle, header clock update, DOM update). No unit tests for DOM wiring; manual browser test is sufficient. Document the expected HTML structure in a comment at the top of `viewer.ts`.
+- [x] **T-10.4** Implement the top-level viewer wiring (keyboard listener, carousel setup, reveal toggle, header clock update, DOM update). No unit tests for DOM wiring; manual browser test is sufficient. Document the expected HTML structure in a comment at the top of `viewer.ts`.
 
 ---
 
 ## Phase 11 — Public API barrel (`index.ts`)
 
-- [ ] **T-11.1** Create `skeleton/src/index.ts` that re-exports all public names from every module. Verify by importing each exported name in a smoke test.
+- [x] **T-11.1** Create `skeleton/src/index.ts` that re-exports all public names from every module. Verify by importing each exported name in a smoke test.
 
 ---
 
 ## Phase 12 — Integration
 
-- [ ] **T-12.1** Run the full test suite (`vitest run`) and confirm all tests pass with zero failures.
-- [ ] **T-12.2** Run `tsc --noEmit` and confirm zero TypeScript errors.
-- [ ] **T-12.3** Confirm `skeleton/package.json` lists zero entries under `dependencies` (only `devDependencies`).
+- [x] **T-12.1** Run the full test suite (`vitest run`) and confirm all tests pass with zero failures.
+- [x] **T-12.2** Run `tsc --noEmit` and confirm zero TypeScript errors.
+- [x] **T-12.3** Confirm `skeleton/package.json` lists zero entries under `dependencies` (only `devDependencies`).
 
 ---
 
 ## Phase 13 — Page builder (`builder.ts`) — REQ-10
 
-- [ ] **T-13.1** Implement `PageBuilder` in `skeleton/src/builder.ts` with all methods from design §14: `header`, `title`, `text`, `heading`, `value`, `mosaicBar`, `list`, `wrapText`, and `build`. Enforce the row-23 guard on every write method. `build()` returns a copy via `page.slice()`.
-- [ ] **T-13.2** Write `skeleton/test/builder.test.ts`:
+- [x] **T-13.1** Implement `PageBuilder` in `skeleton/src/builder.ts` with all methods from design §14: `header`, `title`, `text`, `heading`, `value`, `mosaicBar`, `list`, `wrapText`, and `build`. Enforce the row-23 guard on every write method. `build()` returns a copy via `page.slice()`.
+- [x] **T-13.2** Write `skeleton/test/builder.test.ts`:
   - Unit: `new PageBuilder().build()` returns a `Uint8Array` of exactly 960 bytes, all 0x20.
   - Unit: `header(100, 'TEST', '12:00:00')` writes `100` at cols 0–2 of row 0 and `12:00:00` at cols 32–39.
   - Unit: `title('HELLO')` places 0x0D at row 1 col 0, 0x06 at row 1 col 1, and ASCII bytes of `HELLO` at row 1 cols 2–6. Row 2 is all 0x20.
@@ -186,15 +188,15 @@ Tasks are ordered so that each module can be implemented and tested before the m
 
 ## Phase 14 — Page providers and the viewer (`viewer.ts`) — REQ-11
 
-- [ ] **T-14.1** Define and export `ProvidedPage`, `PageProvider`, and `ViewerMachineState` types in `skeleton/src/viewer.ts` as described in design §11.2–11.3.
-- [ ] **T-14.2** Implement the `mountTeletext(element, provider, options)` function (design §11.4):
+- [x] **T-14.1** Define and export `ProvidedPage`, `PageProvider`, and `ViewerMachineState` types in `skeleton/src/viewer.ts` as described in design §11.2–11.3.
+- [x] **T-14.2** Implement the `mountTeletext(element, provider, options)` function (design §11.4):
   - Shows the loading system page (from `system-pages.ts`) while a provider call is in flight.
   - Shows the not-found system page when the provider resolves `null`.
   - Shows the error system page (title `'FETCH ERROR'`) when the provider rejects.
   - Otherwise renders the resolved page through `interpretPage` and `renderSVG`.
   - Overlays the partial digit string in row 0 cols 0–2 during digit entry.
   - Returns an unmount function that stops all timers and removes the SVG element.
-- [ ] **T-14.3** Write `skeleton/test/viewer.test.ts` additions for REQ-11:
+- [x] **T-14.3** Write `skeleton/test/viewer.test.ts` additions for REQ-11:
   - Unit: digit keys '0'–'9' map to `{ type: 'digit', value: 0..9 }` (existing test, kept).
   - Unit: `mountTeletext` calls `provider(100, 0)` on initial mount.
   - Unit: when `provider` resolves `null`, the state machine is in `not-found` state.
@@ -207,8 +209,8 @@ Tasks are ordered so that each module can be implemented and tested before the m
 
 ## Phase 15 — Built-in system pages (`system-pages.ts`) — REQ-12
 
-- [ ] **T-15.1** Implement `makeLoadingPage`, `makeNotFoundPage`, and `makeErrorPage` in `skeleton/src/system-pages.ts` as described in design §15. All three use `PageBuilder` internally.
-- [ ] **T-15.2** Write `skeleton/test/system-pages.test.ts`:
+- [x] **T-15.1** Implement `makeLoadingPage`, `makeNotFoundPage`, and `makeErrorPage` in `skeleton/src/system-pages.ts` as described in design §15. All three use `PageBuilder` internally.
+- [x] **T-15.2** Write `skeleton/test/system-pages.test.ts`:
   - Unit: `makeLoadingPage(200)` returns 960 bytes; row 0 contains `200`; row 5 contains `Loading...`; row 23 is all 0x20.
   - Unit: `makeNotFoundPage(456)` returns 960 bytes; row 2 contains `PAGE 456 NOT FOUND`; row 23 is all 0x20.
   - Unit: `makeErrorPage('ERR', 'Something failed', { red: null, green: null, yellow: null, cyan: null, index: null })` returns 960 bytes; row 1 has 0x0D at col 0 and 0x01 at col 1; row 23 contains the four colour control bytes from `fillPromptRow`.
