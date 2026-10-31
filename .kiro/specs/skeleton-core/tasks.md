@@ -18,7 +18,7 @@ Tasks are ordered so that each module can be implemented and tested before the m
 
 ## Phase 1 — Shared types
 
-- [ ] **T-1.1** Implement `skeleton/src/types.ts`: define and export `RawPage`, `RawRow`, `Colour`, `Size`, `CharMode` as described in design §2. No logic, no tests needed for types alone.
+- [x] **T-1.1** Implement `skeleton/src/types.ts`: define and export `RawPage`, `RawRow`, `Colour`, `Size`, `CharMode` as described in design §2. No logic, no tests needed for types alone.
 
 ---
 
