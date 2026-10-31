@@ -4,6 +4,8 @@
 # three consecutive failures so a broken suite cannot burn credits forever.
 
 mkdir -p .cache
+# Nothing to verify until at least one test file exists.
+ls skeleton/test/*.test.ts >/dev/null 2>&1 || exit 0
 count_file=.cache/stop-hook-failures
 npm test --silent >.cache/stop-hook-last.log 2>&1
 status=$?
