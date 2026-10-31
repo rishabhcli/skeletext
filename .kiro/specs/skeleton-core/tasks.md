@@ -22,8 +22,8 @@ Tasks are ordered so that each module can be implemented and tested before the m
 
 ## Phase 2 — Cell model (`grid.ts`) — REQ-1
 
-- [ ] **T-2.1** Implement `createPage`, `getCell`, `setCell`, `getRow`, and the constants `HEADER_ROW = 0` and `PROMPT_ROW = 23` in `skeleton/src/grid.ts`. Bounds checks throw `RangeError`; byte values outside 0–127 are rejected at write time.
-- [ ] **T-2.2** Write `skeleton/test/grid.test.ts`:
+- [x] **T-2.1** Implement `createPage`, `getCell`, `setCell`, `getRow`, and the constants `HEADER_ROW = 0` and `PROMPT_ROW = 23` in `skeleton/src/grid.ts`. Bounds checks throw `RangeError`; byte values outside 0–127 are rejected at write time.
+- [x] **T-2.2** Write `skeleton/test/grid.test.ts`:
   - Unit: `createPage` returns a 960-byte Uint8Array of 0x20.
   - Unit: `getCell`/`setCell` round-trip at corners (0,0), (0,39), (23,0), (23,39).
   - Unit: `setCell` throws `RangeError` for byte 0x80 and for out-of-range row/col.
@@ -33,8 +33,8 @@ Tasks are ordered so that each module can be implemented and tested before the m
 
 ## Phase 3 — Control code table (`codes.ts`) — REQ-2
 
-- [ ] **T-3.1** Implement `CONTROL_CODES`, `ROW_DEFAULTS`, `isSetAt`, `isControlByte` in `skeleton/src/codes.ts`. The 32 entries are defined literally from the ETS 300 706 reference.
-- [ ] **T-3.2** Write `skeleton/test/codes.test.ts`:
+- [x] **T-3.1** Implement `CONTROL_CODES`, `ROW_DEFAULTS`, `isSetAt`, `isControlByte` in `skeleton/src/codes.ts`. The 32 entries are defined literally from the ETS 300 706 reference.
+- [x] **T-3.2** Write `skeleton/test/codes.test.ts`:
   - Unit: `CONTROL_CODES` has exactly 32 entries (REQ-2.1).
   - Unit: the set-at bytes are exactly `[0x09, 0x0C, 0x18, 0x19, 0x1A, 0x1C, 0x1D, 0x1E]` (REQ-2.2).
   - Unit: the four no-effect bytes are `[0x00, 0x0E, 0x0F, 0x10]` (REQ-2.3).
@@ -45,8 +45,8 @@ Tasks are ordered so that each module can be implemented and tested before the m
 
 ## Phase 4 — Mosaic helpers (`mosaic.ts`) — REQ-4
 
-- [ ] **T-4.1** Implement `encodeBlockMask` and `decodeBlockMask` in `skeleton/src/mosaic.ts` using the formulas from design §6.
-- [ ] **T-4.2** Write `skeleton/test/mosaic.test.ts`:
+- [x] **T-4.1** Implement `encodeBlockMask` and `decodeBlockMask` in `skeleton/src/mosaic.ts` using the formulas from design §6.
+- [x] **T-4.2** Write `skeleton/test/mosaic.test.ts`:
   - Unit: `encodeBlockMask(0)` === 0x20 and `encodeBlockMask(63)` === 0x7F (REQ-4.3).
   - Unit: every encoded byte has bit 5 set (REQ-4.4).
   - **[PBT REQ-4.1]** `fc.integer({min:0,max:63})`: `decodeBlockMask(encodeBlockMask(mask))` === mask.

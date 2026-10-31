@@ -25,7 +25,11 @@ export function getCell(page: RawPage, row: number, col: number): number {
   if (col < 0 || col >= COLS) {
     throw new RangeError(`Column index out of range: ${col}`);
   }
-  return page[row * COLS + col];
+  const value = page[row * COLS + col];
+  if (value === undefined) {
+    throw new RangeError(`Failed to read cell at (${row}, ${col})`);
+  }
+  return value;
 }
 
 // Set a cell value at (row, col)

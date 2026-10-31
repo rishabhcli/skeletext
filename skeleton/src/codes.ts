@@ -1,18 +1,16 @@
 // Control code table (REQ-2)
+// Based on ETS 300 706 Table 26
 
 import type { Colour } from './types.js';
 
-// Control code entry
 export interface ControlCode {
-  byte: number;     // 0x00 to 0x1F
-  name: string;     // canonical ETS 300 706 name
+  byte: number;
+  name: string;
   timing: 'set-at' | 'set-after';
-  noEffect: boolean; // true for codes without effect at Level 1
+  noEffect: boolean;
 }
 
-// All 32 Level 1 spacing attributes (ETSI ETS 300 706 Table 26)
-// The four no-effect codes at Level 1: Alpha Black (0x00), Mosaics Black (0x10),
-// Double Width (0x0E), Double Size (0x0F)
+// All 32 Level 1 spacing attributes
 export const CONTROL_CODES: readonly ControlCode[] = [
   { byte: 0x00, name: 'Alpha Black', timing: 'set-after', noEffect: true },
   { byte: 0x01, name: 'Alpha Red', timing: 'set-after', noEffect: false },
@@ -49,16 +47,14 @@ export const CONTROL_CODES: readonly ControlCode[] = [
 ] as const;
 
 // The seven default bytes applied at the start of each row
-// Alpha White (0x07), Steady (0x09), End Box (0x0A), Normal Size (0x0C),
-// Contiguous Mosaic Graphics (0x19), Black Background (0x1C), Release Mosaics (0x1F)
 export const ROW_DEFAULTS: readonly number[] = [0x07, 0x09, 0x0A, 0x0C, 0x19, 0x1C, 0x1F] as const;
 
-// Check if a control byte is set-at
+// Check if a byte is a set-at control code
 export function isSetAt(byte: number): boolean {
-  return byte === 0x09 || byte === 0x0C || byte === 0x18 || byte === 0x19 || byte === 0x1A || byte === 0x1C || byte === 0x1D || byte === 0x1E;
+  return [0x09, 0x0C, 0x18, 0x19, 0x1A, 0x1C, 0x1D, 0x1E].includes(byte);
 }
 
-// Check if a byte is a control byte (0x00-0x1F)
+// Check if a byte is a control code (0x00 to 0x1F)
 export function isControlByte(byte: number): boolean {
   return byte >= 0x00 && byte <= 0x1F;
 }

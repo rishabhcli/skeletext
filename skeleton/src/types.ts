@@ -1,15 +1,15 @@
-// Shared types for the skeleton package
+// Shared types for the skeleton-core package
 
-// A raw teletext page is a flat 960-byte Uint8Array (24 rows × 40 columns)
+// A 960-byte page grid (24 rows × 40 columns)
 export type RawPage = Uint8Array;
 
-// A single row is a 40-byte slice of RawPage
+// A single row of 40 bytes
 export type RawRow = Uint8Array;
 
-// Colour index: 0-7 for the 8-colour palette
+// Colour index: 0–7 (teletext palette)
 export type Colour = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
-// Cell size attribute
+// Size attribute for display cells
 export type Size = 'normal' | 'double-height-top' | 'double-height-lower';
 
 // Character mode: alpha (G0) or mosaic (G1)
