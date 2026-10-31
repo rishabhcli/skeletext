@@ -47,8 +47,9 @@ function mosaicRects(cell: DisplayCell, x: number, y: number): string {
     if ((cell.mosaicMask & bit) === 0) continue;
     const x0 = x + (COL_EDGES[c] as number);
     const y0 = y + (ROW_EDGES[r] as number);
-    const w = (COL_EDGES[c + 1] as number) - (COL_EDGES[c] as number) - (cell.separated ? 1 : 0);
-    const h = (ROW_EDGES[r + 1] as number) - (ROW_EDGES[r] as number) - (cell.separated ? 1 : 0);
+    // Contiguous blocks overlap their neighbours by half a unit so no seam shows when the SVG is scaled.
+    const w = (COL_EDGES[c + 1] as number) - (COL_EDGES[c] as number) + (cell.separated ? -1 : 0.5);
+    const h = (ROW_EDGES[r + 1] as number) - (ROW_EDGES[r] as number) + (cell.separated ? -1 : 0.5);
     out += `<rect class="m" x="${x0}" y="${y0}" width="${w}" height="${h}" fill="${colour(cell.fg)}"/>`;
   }
   return out;
@@ -104,7 +105,7 @@ export function renderSVG(cells: DisplayCell[][]): string {
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${SVG_W} ${SVG_H}" preserveAspectRatio="xMidYMid meet" style="display:block;width:100%;height:auto;background:#000" ` +
     `role="img" aria-label="Teletext page" font-family="${FONT}" font-size="19" shape-rendering="crispEdges">` +
-    `<style>.flash{animation:tt-flash 1s steps(1,end) infinite}@keyframes tt-flash{0%{opacity:1}50%{opacity:0}}` +
+    `<style>.m{shape-rendering:crispEdges}.flash{animation:tt-flash 1s steps(1,end) infinite}@keyframes tt-flash{0%{opacity:1}50%{opacity:0}}` +
     `@media (prefers-reduced-motion:reduce){.flash{animation:none}}</style>` +
     `<rect width="${SVG_W}" height="${SVG_H}" fill="#000000"/>` +
     `<g class="bg" shape-rendering="crispEdges">${bg}</g>` +

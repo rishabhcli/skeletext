@@ -78,7 +78,7 @@ describe('REQ-8 SVG renderer', () => {
       const page = createPage();
       put(page, 0, 0, [0x11, ...(separated ? [0x1a] : []), encodeBlockMask(63)]);
       const rect = draw(page).match(/<rect class="m"[^>]*>/)?.[0] ?? '';
-      return Number(/width="(\d+)"/.exec(rect)?.[1]) * Number(/height="(\d+)"/.exec(rect)?.[1]);
+      return Number(/width="([\d.]+)"/.exec(rect)?.[1]) * Number(/height="([\d.]+)"/.exec(rect)?.[1]);
     };
     expect(area(true)).toBeLessThan(area(false));
   });
