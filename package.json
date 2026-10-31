@@ -1,0 +1,19 @@
+{
+  "name": "skeletext-workspace",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "A zero-dependency teletext page engine and two apps built on it",
+  "workspaces": ["skeleton", "apps/*", "tools/*"],
+  "scripts": {
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "fast-check": "^3.23.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
