@@ -8,9 +8,9 @@ Tasks are ordered so that each module can be implemented and tested before the m
 
 ## Phase 0 — Project scaffold
 
-- [ ] **T-0.1** Create `skeleton/package.json` with `name: "skeleton"`, `type: "module"`, `exports: "./src/index.ts"`, and devDependencies for `vitest` and `fast-check`. No runtime dependencies.
-- [ ] **T-0.2** Create `skeleton/tsconfig.json` with `strict: true`, `target: "ES2022"`, `module: "NodeNext"`, and `moduleResolution: "NodeNext"`.
-- [ ] **T-0.3** Add a `vitest.config.ts` at `skeleton/` root that includes `skeleton/test/**/*.test.ts`.
+- [x] **T-0.1** Create `skeleton/package.json` with `name: "@skeletext/core"`, `type: "module"`, `exports: "./src/index.ts"`, and devDependencies for `vitest` and `fast-check`. No runtime dependencies.
+- [x] **T-0.2** Create `skeleton/tsconfig.json` with `strict: true`, `target: "ES2022"`, `module: "NodeNext"`, `moduleResolution: "NodeNext"`, and `extends: "../tsconfig.base.json"` to inherit shared compiler settings from the monorepo root.
+- [x] **T-0.3** Add a `vitest.config.ts` at `skeleton/` root that includes `skeleton/test/**/*.test.ts`.
 
 ---
 
@@ -161,3 +161,57 @@ Tasks are ordered so that each module can be implemented and tested before the m
 - [ ] **T-12.1** Run the full test suite (`vitest run`) and confirm all tests pass with zero failures.
 - [ ] **T-12.2** Run `tsc --noEmit` and confirm zero TypeScript errors.
 - [ ] **T-12.3** Confirm `skeleton/package.json` lists zero entries under `dependencies` (only `devDependencies`).
+
+---
+
+## Phase 13 — Page builder (`builder.ts`) — REQ-10
+
+- [ ] **T-13.1** Implement `PageBuilder` in `skeleton/src/builder.ts` with all methods from design §14: `header`, `title`, `text`, `heading`, `value`, `mosaicBar`, `list`, `wrapText`, and `build`. Enforce the row-23 guard on every write method. `build()` returns a copy via `page.slice()`.
+- [ ] **T-13.2** Write `skeleton/test/builder.test.ts`:
+  - Unit: `new PageBuilder().build()` returns a `Uint8Array` of exactly 960 bytes, all 0x20.
+  - Unit: `header(100, 'TEST', '12:00:00')` writes `100` at cols 0–2 of row 0 and `12:00:00` at cols 32–39.
+  - Unit: `title('HELLO')` places 0x0D at row 1 col 0, 0x06 at row 1 col 1, and ASCII bytes of `HELLO` at row 1 cols 2–6. Row 2 is all 0x20.
+  - Unit: `text(5, 2, 'HI', { fg: 1 })` places 0x01 at (5, 2) and `H`, `I` at (5, 3) and (5, 4).
+  - Unit: `text(row, col, longString)` where text would overflow col 39 truncates and places `>` at col 38 (or the last fitting position).
+  - Unit: calling `text(23, 0, 'X')` does not write anything (row 23 guard).
+  - Unit: `mosaicBar(5, 0, 8, 0.5, 2)` writes the mosaic colour byte at col 0 and four filled mosaic cells followed by four empty mosaic cells.
+  - Unit: `wrapText('hello world foo', 7)` returns `['hello', 'world', 'foo']`.
+  - Unit: `wrapText('averylongword', 5)` returns `['avery', 'longo', 'rd']` (hard split at 5).
+  - **[PBT REQ-10.1]** Arbitrary sequences of operations: `build()` always returns 960 bytes where every byte is in 0–127.
+  - **[PBT REQ-10.2]** Arbitrary `text`/`heading`/`value`/`mosaicBar`/`list` calls targeting row 23: no non-space byte appears in row 23 of the built page.
+  - **[PBT REQ-10.3]** `mosaicBar` with fractions `f1 <= f2`: filled block count for `f1` ≤ filled block count for `f2`.
+  - **[PBT REQ-10.4]** `wrapText(str, width)` for arbitrary strings and widths ≥ 1: no line exceeds `width`; joining lines with spaces contains all original words.
+
+---
+
+## Phase 14 — Page providers and the viewer (`viewer.ts`) — REQ-11
+
+- [ ] **T-14.1** Define and export `ProvidedPage`, `PageProvider`, and `ViewerMachineState` types in `skeleton/src/viewer.ts` as described in design §11.2–11.3.
+- [ ] **T-14.2** Implement the `mountTeletext(element, provider, options)` function (design §11.4):
+  - Shows the loading system page (from `system-pages.ts`) while a provider call is in flight.
+  - Shows the not-found system page when the provider resolves `null`.
+  - Shows the error system page (title `'FETCH ERROR'`) when the provider rejects.
+  - Otherwise renders the resolved page through `interpretPage` and `renderSVG`.
+  - Overlays the partial digit string in row 0 cols 0–2 during digit entry.
+  - Returns an unmount function that stops all timers and removes the SVG element.
+- [ ] **T-14.3** Write `skeleton/test/viewer.test.ts` additions for REQ-11:
+  - Unit: digit keys '0'–'9' map to `{ type: 'digit', value: 0..9 }` (existing test, kept).
+  - Unit: `mountTeletext` calls `provider(100, 0)` on initial mount.
+  - Unit: when `provider` resolves `null`, the state machine is in `not-found` state.
+  - Unit: when `provider` rejects, the state machine is in `error` state.
+  - Unit: when `provider` resolves a `ProvidedPage`, the state machine is in `page` state.
+  - **[PBT REQ-11.1]** For any provider outcome (resolved page, null, rejection), the viewer machine ends in exactly one of the four states.
+  - **[PBT REQ-11.2]** For any digit sequence, `enterDigit` combined with the provider is never called with a page number outside 100–899.
+
+---
+
+## Phase 15 — Built-in system pages (`system-pages.ts`) — REQ-12
+
+- [ ] **T-15.1** Implement `makeLoadingPage`, `makeNotFoundPage`, and `makeErrorPage` in `skeleton/src/system-pages.ts` as described in design §15. All three use `PageBuilder` internally.
+- [ ] **T-15.2** Write `skeleton/test/system-pages.test.ts`:
+  - Unit: `makeLoadingPage(200)` returns 960 bytes; row 0 contains `200`; row 5 contains `Loading...`; row 23 is all 0x20.
+  - Unit: `makeNotFoundPage(456)` returns 960 bytes; row 2 contains `PAGE 456 NOT FOUND`; row 23 is all 0x20.
+  - Unit: `makeErrorPage('ERR', 'Something failed', { red: null, green: null, yellow: null, cyan: null, index: null })` returns 960 bytes; row 1 has 0x0D at col 0 and 0x01 at col 1; row 23 contains the four colour control bytes from `fillPromptRow`.
+  - Unit: `makeErrorPage` with a long `message` wraps the text across multiple rows and nothing appears on row 23 except the Fastext prompt.
+  - **[PBT REQ-12.1]** Arbitrary inputs to all three functions: always return exactly 960 bytes.
+  - **[PBT REQ-12.2]** `makeLoadingPage` and `makeNotFoundPage` for any page number: every byte of row 23 is 0x20.

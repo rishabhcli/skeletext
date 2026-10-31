@@ -241,3 +241,68 @@ WHEN the interpreter encounters any of 0x00 (Alpha Black), 0x10 (Mosaics Black),
 - **REQ-9.1** The viewer contains no business logic; it only calls skeleton functions and updates the DOM.
 - **REQ-9.2** The carousel timer is started and stopped through a single exported function pair so tests can control it.
 - **REQ-9.3** The keyboard handler is a pure function that maps a `KeyboardEvent.key` string to a skeleton action type; it has no side effects.
+
+---
+
+## REQ-10 Page composition
+
+**WHEN** an app uses the page builder THE SYSTEM SHALL provide a `PageBuilder` class in `skeleton/src/builder.ts` that lets apps lay out pages without writing raw bytes. The builder exposes the following operations:
+
+- `header(pageNumber: number, serviceName: string, clockText: string)` — writes row 0 with the page number left-aligned, the service name centred, and the clock text right-aligned in columns 32–39.
+- `title(text: string)` — writes rows 1 and 2 as a double-height cyan title: places 0x0D (Double Height) at column 0 and 0x06 (Alpha Cyan) at column 1 of row 1, then writes the text starting at column 2; row 2 is left as the double-height lower row.
+- `text(row: number, col: number, str: string, options?: { fg?: Colour; bg?: Colour })` — writes the string starting at (row, col), applying an optional foreground and background colour control code before the text; if the text plus its control codes would reach or exceed column 39 the text is silently truncated at column 39 and the last visible character is replaced with `>` to indicate overflow; text that fits within bounds is written as-is; row 23 is rejected and the call is silently ignored.
+- `heading(row: number, str: string)` — writes 0x03 (Alpha Yellow) at col 0, then `str` from col 1; silently truncates to column 39.
+- `value(row: number, col: number, str: string)` — writes 0x07 (Alpha White) then `str`; silently truncates to column 39.
+- `mosaicBar(row: number, col: number, width: number, fraction: number, colour: Colour)` — writes the mosaic colour control byte (`colour + 0x10`) then `Math.round(fraction * width)` cells of `encodeBlockMask(0x3F)` followed by enough `encodeBlockMask(0)` cells to fill the remaining width; clamps `fraction` to [0, 1].
+- `list(row: number, label: string, valueStr: string)` — writes the label left-aligned in green (0x02) and the value right-aligned in white (0x07) on the same row, fitting within 40 columns.
+- `wrapText(str: string, width: number): string[]` — a pure helper method that splits `str` into lines no longer than `width` characters, breaking on spaces; words longer than `width` are hard-split.
+- `build(): RawPage` — returns the completed page as a 960-byte `Uint8Array`.
+
+The builder must place each colour or size control code in its own cell (control codes occupy a cell per ETS 300 706). It must never write outside row bounds (0–23) or column bounds (0–39). It must never put data text on row 23.
+
+### Acceptance criteria
+
+- **REQ-10.1** [PBT] For any sequence of builder operations, `build()` returns a `RawPage` of exactly 960 bytes where every byte is in the range 0 to 127.
+- **REQ-10.2** [PBT] No sequence of builder operations writes any non-space byte into row 23 (the Fastext prompt row is protected).
+- **REQ-10.3** [PBT] `mosaicBar` with any `fraction` in [0, 1] produces a number of filled mosaic blocks that is monotonically non-decreasing as `fraction` increases.
+- **REQ-10.4** [PBT] `wrapText(str, width)` returns lines where no line exceeds `width` characters, and joining the lines with spaces reconstructs the original words in their original order.
+
+---
+
+## REQ-11 Page providers and the viewer
+
+**WHEN** an app mounts the teletext viewer THE SYSTEM SHALL define the following abstractions in `skeleton/src/viewer.ts`:
+
+- `ProvidedPage` — a record with `subpages: RawPage[]` (at least one entry) and `fastext: FastextConfig`.
+- `PageProvider` — the function type `(pageNumber: number, subpage: number) => Promise<ProvidedPage | null>`. A return value of `null` means the page does not exist.
+- `mountTeletext(element: HTMLElement, provider: PageProvider, options?: { carouselMs?: number }): () => void` — mounts the viewer into `element`, starts the digit-entry state machine, the carousel timer, and the header clock. Returns an unmount function. The viewer behaves as follows:
+  - While a provider call is pending it shows the built-in loading page (REQ-12) and displays the partial digit string in the header.
+  - If the provider resolves to `null` it shows the built-in not-found page (REQ-12).
+  - If the provider rejects it shows the built-in error page (REQ-12).
+  - Otherwise it interprets and renders the page through the existing `interpretPage` and `renderSVG` pipeline.
+- While a three-digit page number is being entered the viewer shows the typed digits in columns 0–2 of row 0 of the currently displayed page.
+
+The viewer state machine has exactly four states: `loading`, `page`, `not-found`, and `error`. It is never in more than one state at a time.
+
+### Acceptance criteria
+
+- **REQ-11.1** [PBT] For any provider result (resolved `ProvidedPage`, resolved `null`, or rejected `Promise`), the viewer state machine ends in exactly one of the four states: `loading`, `page`, `not-found`, or `error`.
+- **REQ-11.2** [PBT] Digit entry combined with any provider never causes the viewer to request a page number outside the range 100 to 899.
+
+---
+
+## REQ-12 Built-in system pages
+
+**WHEN** any part of the system needs to display a standard status screen THE SYSTEM SHALL provide the following pure builder functions in `skeleton/src/system-pages.ts`, so that every app shows the same system screens without duplicating page-building code:
+
+- `makeLoadingPage(pageNumber: number): RawPage` — produces a loading page for the given page number. Row 0 shows the page number and `Loading...`. Row 5 shows `Loading...` in white. Row 23 is left as a blank prompt row.
+- `makeNotFoundPage(pageNumber: number): RawPage` — produces a not-found page. Row 2 shows `PAGE NNN NOT FOUND` in red (0x01), where NNN is the three-digit page number. Row 4 shows `Enter a page number (100-899)`. Row 23 is the Fastext prompt row.
+- `makeErrorPage(title: string, message: string, fastext: FastextConfig): RawPage` — produces an error page. Row 1–2 shows `title` as a double-height red title. Row 4 onwards shows `message` wrapped with `wrapText` from `builder.ts`, one line per row, up to row 21. Row 23 uses `fillPromptRow` with the provided `fastext` configuration.
+
+All three functions use `wrapText` for any text that might exceed 38 columns.
+
+### Acceptance criteria
+
+- **REQ-12.1** [PBT] `makeLoadingPage`, `makeNotFoundPage`, and `makeErrorPage` always return a `RawPage` of exactly 960 bytes.
+- **REQ-12.2** [PBT] The byte at every cell of row 23 produced by `makeLoadingPage` and `makeNotFoundPage` is 0x20 (the row is blank, reserved for the Fastext prompt, not written by these two functions).
+- **REQ-12.3** For `makeErrorPage`, row 23 is filled by `fillPromptRow` using the provided `fastext` argument; no data text appears on row 23.

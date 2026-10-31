@@ -9,17 +9,19 @@ This document describes the module structure, data types, and algorithms for the
 ```
 skeleton/
   src/
-    types.ts        — shared type aliases (no logic)
-    grid.ts         — cell model (REQ-1)
-    codes.ts        — control code table (REQ-2)
-    interpreter.ts  — display interpreter (REQ-3)
-    mosaic.ts       — mosaic helpers (REQ-4)
-    store.ts        — page store and router (REQ-5)
-    fastext.ts      — Fastext links and prompt row (REQ-6)
-    codec.ts        — encode / decode (REQ-7)
-    renderer.ts     — SVG renderer (REQ-8)
-    viewer.ts       — browser viewer wiring (REQ-9)
-    index.ts        — single public re-export barrel
+    types.ts         — shared type aliases (no logic)
+    grid.ts          — cell model (REQ-1)
+    codes.ts         — control code table (REQ-2)
+    interpreter.ts   — display interpreter (REQ-3)
+    mosaic.ts        — mosaic helpers (REQ-4)
+    store.ts         — page store and router (REQ-5)
+    fastext.ts       — Fastext links and prompt row (REQ-6)
+    codec.ts         — encode / decode (REQ-7)
+    renderer.ts      — SVG renderer (REQ-8)
+    viewer.ts        — browser viewer wiring (REQ-9, REQ-11)
+    builder.ts       — PageBuilder for app page composition (REQ-10)
+    system-pages.ts  — built-in loading, not-found and error pages (REQ-12)
+    index.ts         — single public re-export barrel
   test/
     grid.test.ts
     codes.test.ts
@@ -30,6 +32,8 @@ skeleton/
     codec.test.ts
     renderer.test.ts
     viewer.test.ts
+    builder.test.ts
+    system-pages.test.ts
   package.json
   tsconfig.json
 ```
@@ -341,7 +345,7 @@ All output is assembled by string concatenation; no DOM is used so the renderer 
 
 ---
 
-## 11. Browser viewer (`viewer.ts`) — REQ-9
+## 11. Browser viewer (`viewer.ts`) — REQ-9, REQ-11
 
 ### 11.1 Responsibilities
 
@@ -358,7 +362,58 @@ The viewer is a thin layer of event wiring. It holds no business logic. Its role
 2. Re-render the SVG and update the DOM whenever state changes.
 3. Delegate all state transitions to pure skeleton functions.
 
-### 11.2 Keyboard handler
+### 11.2 Provider types (REQ-11)
+
+`ProvidedPage` is a plain object:
+
+```
+{
+  subpages: RawPage[]       // at least one entry
+  fastext:  FastextConfig
+}
+```
+
+`PageProvider` is a function type:
+
+```
+(pageNumber: number, subpage: number) => Promise<ProvidedPage | null>
+```
+
+A resolved `null` means the page does not exist (triggers the not-found system page). A rejected promise means a fetch error (triggers the error system page).
+
+### 11.3 Viewer state machine (REQ-11)
+
+The viewer is always in exactly one of four states:
+
+```
+ViewerMachineState =
+  | { tag: 'loading';   pageNumber: number }
+  | { tag: 'page';      provided: ProvidedPage; subpage: number }
+  | { tag: 'not-found'; pageNumber: number }
+  | { tag: 'error';     pageNumber: number; reason: string }
+```
+
+Transitions:
+- On navigation to page N: emit `loading`, call `provider(N, 0)`.
+- On `provider` resolving `ProvidedPage`: emit `page`.
+- On `provider` resolving `null`: emit `not-found`.
+- On `provider` rejecting: emit `error` with the error message.
+- On carousel tick while in `page` state: increment subpage index, call `provider(N, subpage)` only if subpage count is unknown; otherwise advance within the known `ProvidedPage.subpages` array.
+
+### 11.4 `mountTeletext` function (REQ-11)
+
+`mountTeletext(element: HTMLElement, provider: PageProvider, options?: { carouselMs?: number }): () => void`
+
+1. Creates a `<div>` inside `element` to hold the SVG.
+2. Starts with an initial navigation to page 100.
+3. Attaches a `keydown` listener on `document` that calls `mapKey` and dispatches the resulting action.
+4. Starts the carousel timer at `options.carouselMs ?? 10_000` milliseconds.
+5. Starts the header clock (1-second interval, updates columns 32–39 of row 0).
+6. Returns an unmount function that removes the listener, stops the carousel, stops the clock, and removes the SVG element.
+
+While digit entry is in progress (one or two digits accumulated), the viewer writes the partial digit string into columns 0–2 of row 0 of the current raw page before passing it through `interpretPage` and `renderSVG`, so the digits are visible in the header.
+
+### 11.5 Keyboard handler
 
 `mapKey(key: string): Action | null`
 
@@ -374,12 +429,12 @@ A pure function that maps `KeyboardEvent.key` strings to discriminated union `Ac
 
 Returns null for unmapped keys. Has no side effects.
 
-### 11.3 Carousel timer
+### 11.6 Carousel timer
 
 `startCarousel(onTick: () => void, intervalMs: number): () => void`
 Returns a stop function. Uses `setInterval` internally. The test suite calls `startCarousel` with a mock `onTick` and controls time with Vitest's fake timers.
 
-### 11.4 Header clock
+### 11.7 Header clock
 
 Updates row 0, columns 32–39 (8 characters) with the current UTC time in `HH:MM:SS` format once per second using `setInterval`. The clock writes directly into the `RawPage` bytes and triggers a re-render.
 
@@ -387,12 +442,13 @@ Updates row 0, columns 32–39 (8 characters) with the current UTC time in `HH:M
 
 ## 12. Public API (`index.ts`)
 
-All exported names from the seven source modules are re-exported from `index.ts`. App code imports only from `'skeleton'` (the package name), never from internal paths.
+All exported names from every source module are re-exported from `index.ts`. App code imports only from `'@skeletext/core'` (the package name), never from internal paths.
 
 Named exports form three groups:
 
-- **Types:** `RawPage`, `DisplayCell`, `PageStore`, `FastextConfig`, `DigitState`, `Action`
-- **Functions:** `createPage`, `getCell`, `setCell`, `getRow`, `interpretPage`, `encodeBlockMask`, `decodeBlockMask`, `nextPage`, `prevPage`, `goToPage`, `enterDigit`, `tickCarousel`, `fillPromptRow`, `handleFastextKey`, `encode`, `decode`, `renderSVG`, `mapKey`, `startCarousel`
+- **Types:** `RawPage`, `DisplayCell`, `PageStore`, `FastextConfig`, `DigitState`, `Action`, `ProvidedPage`, `PageProvider`
+- **Functions:** `createPage`, `getCell`, `setCell`, `getRow`, `interpretPage`, `encodeBlockMask`, `decodeBlockMask`, `nextPage`, `prevPage`, `goToPage`, `enterDigit`, `tickCarousel`, `fillPromptRow`, `handleFastextKey`, `encode`, `decode`, `renderSVG`, `mapKey`, `startCarousel`, `mountTeletext`, `makeLoadingPage`, `makeNotFoundPage`, `makeErrorPage`
+- **Classes:** `PageBuilder`
 - **Constants:** `HEADER_ROW`, `PROMPT_ROW`, `CONTROL_CODES`, `ROW_DEFAULTS`, `isSetAt`, `isControlByte`
 
 ---
@@ -410,3 +466,103 @@ Named exports form three groups:
 **RLE before base64url for codec.** Teletext pages are typically sparse (many spaces and repeated colours). A single-pass RLE produces good compression without a dependency on a compression library.
 
 **SVG by string concatenation, not a DOM builder.** The renderer must work in Node.js for testing and in browsers for display. String concatenation with manual escaping satisfies both environments and keeps the renderer dependency-free.
+
+**`PageBuilder` as a fluent class, not a collection of standalone helpers.** Apps need to compose many operations on a single page. A class with chainable methods groups the page reference with the write operations, reduces parameter repetition, and makes the 40-column and row-23 guards enforceable in one place. The builder is the only class in the skeleton; everything else remains a pure function.
+
+**`PageProvider` as a plain async function, not an interface.** A single function type is the smallest contract that covers both static (pre-built store) and dynamic (lazy-fetch) page sources. The viewer does not need to know whether the provider wraps a `PageStore` or calls `fetch`.
+
+**System pages in a dedicated module, not inlined in viewer.ts.** `makeLoadingPage`, `makeNotFoundPage`, and `makeErrorPage` depend on `PageBuilder` and `fillPromptRow`. Keeping them in `system-pages.ts` means `viewer.ts` imports them as ordinary functions, and apps can call them directly when building their own error flows without pulling in the viewer.
+
+---
+
+## 14. Page builder (`builder.ts`) — REQ-10
+
+### 14.1 Class structure
+
+`PageBuilder` is a class that wraps a `RawPage` created by `createPage()` at construction time.
+
+```
+class PageBuilder {
+  private page: RawPage
+  constructor()
+  header(pageNumber: number, serviceName: string, clockText: string): this
+  title(text: string): this
+  text(row: number, col: number, str: string, options?: { fg?: Colour; bg?: Colour }): this
+  heading(row: number, str: string): this
+  value(row: number, col: number, str: string): this
+  mosaicBar(row: number, col: number, width: number, fraction: number, colour: Colour): this
+  list(row: number, label: string, valueStr: string): this
+  wrapText(str: string, width: number): string[]
+  build(): RawPage
+}
+```
+
+All mutating methods return `this` for chaining. `build()` returns a copy of the internal page via `page.slice()` so the builder can be reused.
+
+### 14.2 Control code placement rules
+
+Every colour or size control code occupies exactly one cell. The builder accounts for this when computing write positions:
+
+- `header`: page number written as a left-aligned 3-digit string at col 0; service name centred in cols 3–31; clock text written at cols 32–39. No colour codes needed in the header row (row 0 inherits Alpha White from row defaults).
+- `title`: col 0 = 0x0D (Double Height, set-after), col 1 = 0x06 (Alpha Cyan, set-after), text starts at col 2. Maximum visible text length = 37 characters. Row 2 is set entirely to 0x20.
+- `text` with foreground colour: writes colour control byte at `col`, text starts at `col + 1`. With background colour: writes background colour byte at `col + 1` (after setting foreground), then 0x1D (New Background, set-at) at `col + 1`, text starts at `col + 2`. The hard cap at column 39 is enforced after accounting for control code cells; overflow is marked with `>` at column 38 (leaving col 39 always available for a trailing control code slot if needed).
+- `heading`: col 0 = 0x03 (Alpha Yellow), text from col 1, maximum 38 characters visible.
+- `value`: writes 0x07 (Alpha White) then text; maximum 38 characters visible.
+- `mosaicBar`: col 0 = mosaic colour control byte (`0x10 + colour`), then `Math.round(clamp(fraction, 0, 1) * width)` cells of `encodeBlockMask(0x3F)`, then `width - filledCount` cells of `encodeBlockMask(0)`. Total cells written = `width + 1` (one for the colour control byte plus `width` mosaic cells). The caller must ensure `col + width + 1 <= 40`.
+- `list`: label written with 0x02 (Alpha Green) at col 0, value written right-aligned at col 39 - value length. If label and value overlap, the label is truncated to leave room for the value.
+
+### 14.3 `wrapText` algorithm
+
+```
+wrapText(str: string, width: number): string[]
+```
+
+1. Split `str` on whitespace into words.
+2. Accumulate words into the current line. If adding the next word (plus a space separator) would exceed `width`, push the current line and start a new one.
+3. Words longer than `width` are hard-split at exactly `width` characters; the remainder starts the next line.
+4. Return the array of lines. An empty input returns `['']`.
+
+This is a pure method; it does not write to the page.
+
+### 14.4 Row 23 guard
+
+Every method that writes to the page checks `if (row === 23) return this` before writing. This applies to `text`, `heading`, `value`, `mosaicBar`, and `list`. The `title` method only writes rows 1 and 2 so no guard is needed there.
+
+---
+
+## 15. Built-in system pages (`system-pages.ts`) — REQ-12
+
+All three functions are pure. They create a new `PageBuilder`, call the appropriate builder methods, and return `build()`.
+
+### 15.1 `makeLoadingPage(pageNumber: number): RawPage`
+
+```
+new PageBuilder()
+  .header(pageNumber, 'Loading...', '')
+  .value(5, 0, 'Loading...')
+  .build()
+```
+
+Row 23 is left entirely as 0x20 (blank). No `fillPromptRow` call is made.
+
+### 15.2 `makeNotFoundPage(pageNumber: number): RawPage`
+
+```
+new PageBuilder()
+  .header(pageNumber, 'Not Found', '')
+  .text(2, 0, `PAGE ${String(pageNumber).padStart(3, '0')} NOT FOUND`, { fg: 1 })
+  .text(4, 0, 'Enter a page number (100-899)')
+  .build()
+```
+
+Row 23 is left entirely as 0x20 (blank).
+
+### 15.3 `makeErrorPage(title: string, message: string, fastext: FastextConfig): RawPage`
+
+1. Start a `PageBuilder`.
+2. Write the title as a double-height red title on rows 1–2: col 0 = 0x0D, col 1 = 0x01 (Alpha Red), text from col 2.
+3. Wrap `message` with `wrapText(message, 38)` and write each line to successive rows starting at row 4, up to row 21.
+4. Write `fillPromptRow(fastext, labels)` bytes directly into row 23 using `setCell`.
+5. Return `build()`.
+
+The `labels` for the Fastext row default to the string representation of each linked page number, or a four-space blank if the link is absent.
