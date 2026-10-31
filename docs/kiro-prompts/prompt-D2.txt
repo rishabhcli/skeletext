@@ -1,0 +1,12 @@
+Follow your working method from the teletext-builder prompt. Implement Phase 5 (display interpreter, REQ-3) of .kiro/specs/skeleton-core/tasks.md in skeleton/src/interpreter.ts with tests in skeleton/test/interpreter.test.ts. Phases 0 to 4 are done; use the existing grid.ts, codes.ts and mosaic.ts.
+
+Read docs/ets300706-level1-reference.md first and implement the timing rules exactly: set-at codes change the state before their own cell is emitted, set-after codes change the state after their own cell is emitted. Details that are easy to get wrong:
+- Alpha and mosaic colour codes are set-after, so the control cell itself keeps the previous foreground; a colour code also selects text or mosaic mode and clears conceal from the next cell on.
+- Conceal is set-at, ends at the next colour code or the end of the row, and a concealed cell shows a space unless reveal is true.
+- Steady and Normal Size are set-at; Flash and Double Height are set-after.
+- New Background is set-at: the background becomes the current foreground immediately, for the control cell too. Black Background is set-at.
+- Hold Mosaics is set-at, Release Mosaics is set-after. Under hold, a control cell shows the held mosaic (the last mosaic byte with bit 6 set in the current row), keeping its separated or contiguous form. The held mosaic resets at the start of a row, on a switch between text and mosaic mode and on a size change.
+- In mosaic mode only bytes 0x20 to 0x3F and 0x60 to 0x7F are mosaics; 0x40 to 0x5F show the capital letter.
+- 0x00, 0x0E, 0x0F and 0x10 are plain spaces with no state change.
+- A double-height code on a row below 23 makes the row below show background only (the lower row cells keep the background of the cell above and show no glyph); double height on row 23 has no effect.
+Write property tests with fast-check for every [PBT] criterion in REQ-3 using arbitraries that mix control and printable bytes (for example fc.uint8Array of length 960 mapped into 0 to 127). Run `npm test --workspace skeleton` and `npx tsc -p skeleton/tsconfig.json`, fix everything, tick the tasks, and print a short summary with the final test line. Stop after Phase 5.

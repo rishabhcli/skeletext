@@ -1,0 +1,19 @@
+Read README.md, every file in .kiro/steering/, and docs/ets300706-level1-reference.md. The reference file is the verified source of truth for control codes, set-at and set-after timing, grid size and mosaic bit layout. Do not contradict it and do not search the web.
+
+Create the Kiro spec for the skeleton core in .kiro/specs/skeleton-core/ using the requirements-first workflow. Write three files: requirements.md, design.md, tasks.md.
+
+Scope of the skeleton (a zero-dependency TypeScript package in skeleton/):
+1. Cell model: a page is 24 rows by 40 columns of 7-bit bytes (row 0 header, row 23 Fastext prompt row).
+2. Control code table with name, byte, timing (set-at or set-after) and the Level 1 defaults at the start of each row.
+3. Display interpreter: turns a page into a 24 by 40 grid of display cells, applying set-at and set-after timing, hold mosaics, conceal and reveal, flash, contiguous and separated mosaics, new background, and double height (including the rule that the row below a double-height row shows only background).
+4. Mosaic helpers: block mask to byte and byte to block mask.
+5. Page store and router: page numbers 100 to 899, subpages, next and previous with wrap, three-digit entry state machine, timed subpage carousel.
+6. Fastext: four coloured links (red, green, yellow, cyan) plus an index link, a function that fills the prompt row, and a key handler.
+7. Codec: encode a page to a compact URL-safe string and decode it back.
+8. SVG renderer: turns display cells into a deterministic SVG string that escapes all text.
+9. A small browser viewer that wires keyboard digits, colour keys, reveal, carousel timer and a header clock to the pure functions.
+
+Requirements rules:
+- Use EARS notation (WHEN ... THE SYSTEM SHALL ...) with numbered requirements and numbered acceptance criteria.
+- Tag every acceptance criterion that states an invariant over all inputs with [PBT]. Write at least 12 [PBT] criteria, covering for example: grid size always 24 by 40; codec round trip; codec output is URL-safe; mosaic mask round trip; set-after control cells never take their own new colour; attribute state never leaks from one row to the next; next and previous page stay in 100 to 899 and are inverse; digit entry never produces a page outside 100 to 899; carousel subpage index is always valid and periodic; double-height lower row has no foreground glyphs; renderer output never contains unescaped angle brackets from page text; the prompt row always has exactly four colour codes and 40 cells.
+- Do not write code in this step. The tasks.md file must be a checklist of small implementation tasks, each referencing requirement numbers, with a property-based test task next to each implementation task, using Vitest and fast-check.

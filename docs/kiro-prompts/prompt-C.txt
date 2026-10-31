@@ -1,0 +1,18 @@
+Read README.md, the files in .kiro/steering/ and docs/ets300706-level1-reference.md. The Kiro documentation pages you need are saved as markdown in .cache/kiro-docs/ (hooks.md, hooks-types.md, custom-agents-configuration-reference.md, mcp-configuration.md, steering.md). Read the relevant parts and follow the formats exactly. Do not search the web.
+
+Create these Kiro configuration files in this repository:
+
+1. A custom agent .kiro/agents/teletext-builder.json plus its prompt file .kiro/agents/teletext-builder.md. It builds the skeletext skeleton and apps from the specs in .kiro/specs/. It loads the steering files, the reference doc and the specs as resources, uses the read, write and shell tool tags, includes the MCP server named teletext (command: node, args: ["tools/teletext-mcp/dist/server.js"]) through mcpServers, and has permission rules that allow shell commands starting with npm, npx, node, git status, git diff, ls and cat, allow writes only under skeleton/, apps/, tools/, docs/ and .kiro/specs/, and deny rm -rf, sudo, git push and any curl piped to a shell. The prompt tells the agent to work one task of tasks.md at a time, to run the matching property test before ticking the task, and to treat docs/ets300706-level1-reference.md as read-only.
+
+2. Standalone hooks in .kiro/hooks/ (one JSON file each, schema version v1):
+   a. pbt-on-save: trigger File Save, matcher for TypeScript files under skeleton/src, command runs the skeleton test suite once (npm test --workspace skeleton).
+   b. protect-reference: trigger Pre Tool Use for write tools, blocks any write to docs/ets300706-level1-reference.md with a clear message (exit code 2 blocks per the docs).
+   c. tests-before-stop: trigger Agent Stop, runs npm test at the repository root; when tests fail it prints a JSON continue decision so the agent keeps working until they pass.
+   d. spec-drift-check: trigger Post Task Execution, agent action that asks the agent to confirm the finished task still matches the requirement numbers it cites.
+   Keep each command short, and where a command needs a helper script put it in .kiro/hooks/scripts/ as a small POSIX shell script.
+
+3. An MCP configuration file .kiro/settings/mcp.json registering the teletext server (same command and args as above) with a 30000 ms timeout.
+
+4. One more steering file .kiro/steering/teletext-style.md with inclusion fileMatch for apps/**/*.ts, covering how app pages should be laid out: header row text, a double-height title on row 1 and 2 only, colours per meaning, no more than 38 visible columns of text per row plus control codes, and row 23 reserved for the Fastext prompt row.
+
+After writing, re-read each file once and check it against the documentation formats.

@@ -1,0 +1,8 @@
+Follow your working method from the teletext-builder prompt. Implement the skeleton-core spec (.kiro/specs/skeleton-core/) for Phases 0 to 4 only: scaffold (already done by hand: the package is named @skeletext/core, skeleton/package.json, skeleton/tsconfig.json and skeleton/vitest.config.ts exist, so tick those tasks after checking them), types, grid, control code table and mosaic helpers.
+
+Rules for this run:
+- Create the source files in skeleton/src/ and tests in skeleton/test/ exactly as the design names them. Do not add runtime dependencies. fast-check and vitest are already installed at the repository root.
+- The control code table must match docs/ets300706-level1-reference.md byte for byte (names, set-at or set-after, no-effect bytes). Read that file before writing codes.ts.
+- Run `npm test --workspace skeleton` after each phase and fix failures before moving on. Also run `npx tsc -p skeleton/tsconfig.json` and fix type errors.
+- Tick each checkbox in .kiro/specs/skeleton-core/tasks.md only after its tests pass.
+- Stop after Phase 4. Print a short summary of what you did and the final test output line.
