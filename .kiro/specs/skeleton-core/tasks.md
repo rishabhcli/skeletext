@@ -56,29 +56,29 @@ Tasks are ordered so that each module can be implemented and tested before the m
 
 ## Phase 5 — Display interpreter (`interpreter.ts`) — REQ-3
 
-- [ ] **T-5.1** Implement the `AttrState` reset logic and the row-scan loop in `skeleton/src/interpreter.ts`. Handle set-at and set-after timing, no-effect codes, and the `DisplayCell` type.
-- [ ] **T-5.2** Write unit tests for basic interpreter cases in `skeleton/test/interpreter.test.ts`:
+- [x] **T-5.1** Implement the `AttrState` reset logic and the row-scan loop in `skeleton/src/interpreter.ts`. Handle set-at and set-after timing, no-effect codes, and the `DisplayCell` type.
+- [x] **T-5.2** Write unit tests for basic interpreter cases in `skeleton/test/interpreter.test.ts`:
   - A page of all 0x20 produces 24×40 cells all with fg=7, bg=0, char=' ', flash=false, conceal=false.
   - Placing a set-after colour code (e.g. 0x01 Red) at column 5: cells 0–5 have fg=7, cells 6–39 have fg=1 (REQ-3.3).
   - Placing a set-at code (e.g. 0x09 Steady) at column 5: cell 5 has steady=true (REQ-3.2).
   - **[PBT REQ-3.1.1]** Arbitrary page: for every row, the first cell always has fg=7, bg=0, flash=false.
   - **[PBT REQ-3.3.1]** Arbitrary column position for a set-after colour code: the cell at that column never has the new foreground colour.
-- [ ] **T-5.3** Implement hold mosaics logic (REQ-3.5). Add tests:
+- [x] **T-5.3** Implement hold mosaics logic (REQ-3.5). Add tests:
   - Unit: control cell under Hold Mosaics shows the held mosaic glyph, not a space.
   - Unit: held mosaic resets to blank at the start of a new row.
-- [ ] **T-5.4** Implement conceal and reveal (REQ-3.6). Add tests:
+- [x] **T-5.4** Implement conceal and reveal (REQ-3.6). Add tests:
   - Unit: concealed cell renders as space when reveal=false.
   - Unit: same cell renders actual char when reveal=true.
-- [ ] **T-5.5** Implement flash and steady (REQ-3.7). Add tests:
+- [x] **T-5.5** Implement flash and steady (REQ-3.7). Add tests:
   - Unit: cell between Flash and Steady has flash=true.
   - Unit: cell at or after Steady has flash=false.
-- [ ] **T-5.6** Implement New Background (REQ-3.8). Add tests:
+- [x] **T-5.6** Implement New Background (REQ-3.8). Add tests:
   - Unit: cell at 0x1D position has bg equal to the fg colour active at that cell.
-- [ ] **T-5.7** Implement double height (REQ-3.9). Add tests:
+- [x] **T-5.7** Implement double height (REQ-3.9). Add tests:
   - Unit: row r+1 cells are all spaces when row r has a Double Height code.
   - Unit: Double Height on row 23 has no effect on row 23 or below.
   - **[PBT REQ-3.9.1]** Arbitrary page with a double-height code in row r < 23: every cell in row r+1 has char=' ' and mosaicMask=0.
-- [ ] **T-5.8** Implement no-effect code handling (REQ-3.10). Add tests:
+- [x] **T-5.8** Implement no-effect code handling (REQ-3.10). Add tests:
   - Unit: bytes 0x00, 0x0E, 0x0F, 0x10 each produce the same display cell as 0x20 at the same column.
 
 ---
