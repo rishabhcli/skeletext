@@ -15,7 +15,10 @@ Teletext, known in the UK as Ceefax, sent numbered pages of 40 by 24 character c
 
 ## Try it
 
-Live demos: see the links at the top of the GitHub repository page (About section) or in the Devpost submission.
+Live demos (static pages, they fetch live public data in your browser):
+
+- Quake Desk: https://skeletext-quake-desk.vercel.app
+- Repo Desk: https://skeletext-repo-desk.vercel.app (add `?repo=owner/name` for another public repository)
 
 Keys: type three digits for a page (100 to 899), `r` `g` `y` `c` for the four Fastext colours, `i` for the index, left and right arrows for the previous and next page, `x` to reveal hidden text. On a phone use the coloured buttons and the page number field below the screen.
 

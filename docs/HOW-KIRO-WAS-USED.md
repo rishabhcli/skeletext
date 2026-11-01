@@ -2,7 +2,7 @@
 
 This write-up says plainly which parts Kiro produced, which parts were written or corrected by hand, and where Kiro's output was wrong. The commit history of the repository follows the same order.
 
-Short version: Kiro CLI wrote all four specs, the custom agent, the hooks, the MCP configuration, and the first versions of most of the skeleton code and tests. The spec-driven loop, steering, hooks, a custom agent, MCP and property-based tests were all used. Review of the generated code found real defects, and the free Kiro credits ran out before the build was finished, so some code was written by hand against the Kiro specs. Both facts are described below.
+Short version: Kiro CLI wrote all four specs, the custom agent, the hooks, the MCP configuration, and the first versions of the grid, control code, mosaic, store, Fastext and codec modules with their tests. Spec-driven development, steering, hooks, a custom agent, MCP and property-based tests were all used. Review of the generated code found real defects, Kiro's attempt at the second app was stopped and replaced, and the free Kiro credits ran out in the middle of the build, so about half of the code was written by hand against the Kiro specs. All of this is described below.
 
 ## Setup and surfaces
 
@@ -15,7 +15,7 @@ Short version: Kiro CLI wrote all four specs, the custom agent, the hooks, the M
 
 The CLI has two agent engines. The default one (V2) wrote the specs. The custom agent, the standalone hooks and the permission rules only load in the V3 engine (`kiro-cli chat --v3 --agent teletext-builder`), which was found by running the agent on the default engine and getting "Mode 'teletext-builder' not found".
 
-Free credits ran out at 50 of 50 during the third implementation run. Kiro answered "You've reached your monthly usage limit". Two causes were visible afterwards: concurrent runs hit service throttling and the retry wrapper re-ran whole prompts, and the custom agent preloaded every spec file into every request. The agent's resources were trimmed afterwards. The Kiroween credit grant needs a government ID check, which was not done.
+Free credits ran out at 50 of 50 during the third implementation run. Kiro answered "You've reached your monthly usage limit". Two causes were visible afterwards: concurrent runs hit service throttling and the retry wrapper re-ran whole prompts, and the custom agent preloaded every spec file into every request. The agent's resources were trimmed afterwards. The plan resets at the start of the next month in UTC, which was 7 PM Central on 31 October, and the build continued after that. The Kiroween credit grant needs a government ID check, which was not done. About 10 of the new month's 50 credits went on the repo-desk run that was stopped (see Apps) and a few on the MCP verification run.
 
 ## Spec-driven development
 
@@ -54,6 +54,8 @@ The strategy that mattered most: a verified reference document, `docs/ets300706-
 
 `.kiro/agents/teletext-builder.json` and `.md` were written by Kiro from the agent documentation. The agent works one task of a `tasks.md` at a time, loads the steering files and the reference, has permission rules (writes only under `skeleton/`, `apps/`, `tools/`, `docs/`, `.kiro/specs/`; no `rm -rf`, `sudo`, `git push`, or curl piped to a shell), and registers the `teletext` MCP server. Two hand corrections: an `fs_read` allow rule (reads were being denied in non-interactive mode) and trimming the preloaded resources to save credits.
 
+One more defect, found when a verification run reported that it had no MCP tools: the generated agent listed the tools `read`, `write` and `shell` but not `@teletext`, so the MCP server it registers was invisible to it. Adding `@teletext` to `tools` and an `mcp` allow rule fixed it.
+
 Which Kiro app: the CLI, V3 engine. It ran the implementation of the skeleton phases, with models `qwen3-coder-next` (0.05x credits) and `claude-haiku-4.5` (0.4x) chosen to stretch the free credits.
 
 ## Hooks
@@ -75,7 +77,7 @@ The Stop hook fired for real during an early V3 test: it ran the suite, found no
 
 `tools/teletext-mcp` is a stdio MCP server with four tools: `explain_code` (byte to name and timing), `render_page` (24-line drawing plus per-row display attributes through the skeleton interpreter), `validate_page` (double height on row 23, Start Box, over-long rows, bytes above 0x7F) and `encode_rows`. It is registered in `.kiro/settings/mcp.json`; `kiro-cli mcp list` shows the server. The server was written by hand against the Kiro spec (credits were out), has 18 tests, and a real `initialize`, `tools/list`, `tools/call` session was run against the built `dist/server.js`.
 
-The app specs tell the agent to build each page from a real saved response and look at it through `render_page` and `validate_page` before ticking a task. That is the workflow the MCP server exists for: judging a teletext page from its bytes is not possible by reading code.
+The workflow it exists for: judging a teletext page from its bytes is not possible by reading code, so quake-desk has a `scripts/dump-page.mjs` that builds a page from saved real data and prints its encoded form, and the agent passes that string to `render_page` and `validate_page`. A verification run with the fixed agent is saved as `docs/review-notes/kiro-mcp-verification-run.txt`: Kiro dumped pages 100, 101, 110, 120 and 199 of quake-desk, called `@teletext/render_page` and `@teletext/validate_page` on each, found no violations, and listed the rows that are cut with the `>` marker. In an earlier attempt at the same task, before the agent was fixed, Kiro could not see the MCP tools, worked around it by writing a test file that was not asked for, and that file was deleted. The verification run is the only place Kiro used the MCP server.
 
 ## Property-based testing
 
@@ -120,9 +122,10 @@ Smaller things fixed by hand: TypeScript errors under `noUncheckedIndexedAccess`
 | `interpreter` and tests | Wrote first version | Rewrote both after review |
 | `renderer`, `builder`, `system-pages`, `viewer` and tests | Not used | Wrote, because the free credits were out |
 | `teletext-mcp` server and tests | Not used | Wrote against Kiro's spec |
+| `quake-desk` app and tests | Spec only | Wrote against Kiro's spec |
+| `repo-desk` app and tests | Spec, and a run that was stopped | Rewrote after the stopped run |
+| MCP verification of app pages | Ran it, using the MCP tools | Fixed the agent so the tools were visible |
 | Steering `product`, `tech`, `structure`, `typescript-gotchas`; verified ETS reference; README; CI workflow | Not used | Wrote |
-
-Apps: see the section below.
 
 ## Vibe coding versus specs
 
@@ -130,4 +133,8 @@ The one place work was done without a spec step was the review of Kiro's interpr
 
 ## Apps
 
-(To be completed when the app builds finish.)
+`apps/quake-desk` (live USGS earthquakes) was written by hand against the Kiro spec, with the structure the spec could not know about yet: a `PageProvider` per app and `mountTeletext` from the skeleton instead of the page store wiring the spec described. It has 28 tests, uses saved real USGS snapshots as fixtures, and is deployed at https://skeletext-quake-desk.vercel.app.
+
+`apps/repo-desk` (public GitHub repository status) was started by Kiro (`qwen3-coder-next`, custom agent, V3 engine). The run was stopped after about 19 minutes and about 10 credits, with the helper modules and a few pages done. Reasons: the model waited long on every step, it added vite and a second copy of esbuild after being told not to add packages, and its page layouts overlapped because `PageBuilder.text` uses two cells for control codes which it did not count when it placed fields in fixed columns. The partial output is in the git history (commit "Kiro run E2") and the app was rewritten by hand with the same structure as quake-desk. 28 tests, saved real API responses as fixtures, deployed at https://skeletext-repo-desk.vercel.app.
+
+Two lessons from the apps that are now tests: static pages must not contain a row that is cut by the `>` marker (the first copy of both apps had several, found by looking at frames of the demo footage), and field positions must be checked by property tests that read the rendered text rather than by trusting the layout arithmetic (the repo-desk tests check that a commit row still shows its full short hash, date and the start of the message).

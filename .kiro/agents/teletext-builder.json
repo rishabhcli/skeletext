@@ -5,7 +5,8 @@
   "tools": [
     "read",
     "write",
-    "shell"
+    "shell",
+    "@teletext"
   ],
   "mcpServers": {
     "teletext": {
@@ -17,6 +18,13 @@
   },
   "permissions": {
     "rules": [
+      {
+        "capability": "mcp",
+        "match": [
+          "teletext/*"
+        ],
+        "effect": "allow"
+      },
       {
         "capability": "fs_read",
         "match": [
