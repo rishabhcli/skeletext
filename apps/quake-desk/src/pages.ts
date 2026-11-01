@@ -25,10 +25,10 @@ export function buildIndexPage(): RawPage {
     ['About this service', '199'],
   ];
   items.forEach(([label, page], i) => b.listRow(6 + i, label, page));
-  b.text(13, 0, 'Type three digits for a page, or use the', { fg: 2 });
-  b.text(14, 0, 'coloured keys. Arrow keys turn the page.', { fg: 2 });
-  b.text(16, 0, 'Red, yellow and white mean quake strength:', { fg: 5 });
-  b.text(17, 0, 'white under 5, yellow 5 to 6, red above 6.', { fg: 5 });
+  b.text(13, 0, 'Type three digits for a page, or use', { fg: 2 });
+  b.text(14, 0, 'the coloured keys. Arrows turn pages.', { fg: 2 });
+  b.text(16, 0, 'Colour shows the strength of a quake:', { fg: 5 });
+  b.text(17, 0, 'white under 5, yellow 5-6, red 6 up', { fg: 5 });
   return finish(b);
 }
 
@@ -122,21 +122,18 @@ export function buildHistogramPage(quakes: QuakeFeature[]): RawPage {
 /** Page 199. */
 export function buildAboutPage(dayGenerated: number | null, weekGenerated: number | null): RawPage {
   const b = base(199, 'About');
-  [
-    'Quake Desk shows live earthquake data from',
-    'the US Geological Survey as teletext pages.',
-  ].forEach((l, i) => b.text(4 + i, 0, l, { fg: 7 }));
+  ['Quake Desk shows live earthquake data', 'from the US Geological Survey.'].forEach((l, i) => b.text(4 + i, 0, l, { fg: 7 }));
   b.heading(7, 'Feeds');
   b.listRow(8, 'Past day, M4.5+', dayGenerated === null ? 'not loaded' : stamp(dayGenerated));
   b.listRow(9, 'Significant, week', weekGenerated === null ? 'not loaded' : stamp(weekGenerated));
-  b.text(10, 0, 'Times are the feed generation times, UTC.', { fg: 5 });
+  b.text(10, 0, 'Times are feed generation times, UTC.', { fg: 5 });
   b.heading(12, 'Teletext');
   [
-    'A 40 by 24 grid of cells, colour codes that',
-    'take a cell each, block graphics, and pages',
-    'numbered 100 to 899. Ceefax ended in 2012.',
+    'A 40 by 24 grid of cells, colour codes',
+    'that take a cell each, block graphics,',
+    'pages 100 to 899. Ceefax ended 2012.',
   ].forEach((l, i) => b.text(13 + i, 0, l, { fg: 7 }));
-  b.text(17, 0, 'Press x to reveal hidden text on a page.', { fg: 2 });
+  b.text(17, 0, 'Press x to reveal hidden text.', { fg: 2 });
   b.text(19, 0, 'Built on skeletext, MIT licensed:', { fg: 3 });
   b.text(20, 0, 'github.com/rishabhcli/skeletext', { fg: 6 });
   return finish(b);

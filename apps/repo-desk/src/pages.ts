@@ -148,13 +148,13 @@ export function buildLanguagesPage(languages: LanguageShare[]): RawPage {
 
 export function buildAboutPage(repo: RepoRef, now: number): RawPage {
   const b = base(199, 'About');
-  ['Repo Desk shows the public status of a', 'GitHub repository as teletext pages.'].forEach((l, i) => b.text(4 + i, 0, l, { fg: 7 }));
+  ['Repo Desk shows the public status of', 'a GitHub repository as teletext.'].forEach((l, i) => b.text(4 + i, 0, l, { fg: 7 }));
   b.listRow(7, 'Showing', `${repo.owner}/${repo.name}`.slice(0, 24));
   b.heading(9, 'Limits');
   [
-    'GitHub allows 60 anonymous requests an hour',
-    'for each visitor. Pages load when opened and',
-    'answers are kept for five minutes.',
+    'GitHub allows 60 anonymous requests',
+    'an hour for each visitor. Pages load',
+    'when opened, answers kept 5 minutes.',
   ].forEach((l, i) => b.text(10 + i, 0, l, { fg: 7 }));
   b.heading(14, 'Another repository');
   b.text(15, 0, 'Add ?repo=owner/name to the address.', { fg: 2 });

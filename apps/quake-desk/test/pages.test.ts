@@ -107,6 +107,12 @@ describe('page builders', () => {
     );
   });
 
+  it('static pages fit the grid: no row of the index or about page is cut with the > marker', () => {
+    for (const page of [buildIndexPage(), buildAboutPage(NOW, NOW), buildAboutPage(null, null)]) {
+      for (const row of text(page).slice(0, 23)) expect(row.trimEnd().endsWith('>')).toBe(false);
+    }
+  });
+
   it('a long place name is cut with a visible marker instead of wrapping', () => {
     const q = { ...real[0]!, place: 'x'.repeat(200) };
     const row = text(buildListSubpages(101, 't', [q], '')[0]!)[4]!;

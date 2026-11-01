@@ -71,6 +71,11 @@ describe('real data pages', () => {
     expect(text(buildCommitSubpages([])[0]!).join('\n')).toContain('No commits found.');
   });
 
+  it('static pages fit the grid: no row of the about page or the empty pages is cut with the > marker', () => {
+    const pages = [buildAboutPage(REPO, NOW), buildPullSubpages([])[0]!, buildIssueSubpages([])[0]!, buildRunSubpages([], NOW)[0]!, buildCommitSubpages([])[0]!];
+    for (const page of pages) for (const row of text(page).slice(0, 23)) expect(row.trimEnd().endsWith('>')).toBe(false);
+  });
+
   it('about page names the repository and the limits', () => {
     const t = text(buildAboutPage(REPO, NOW)).join('\n');
     expect(t).toContain('rishabhcli/skeletext');
