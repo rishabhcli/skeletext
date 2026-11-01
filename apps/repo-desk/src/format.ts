@@ -1,59 +1,35 @@
-/** Format a millisecond duration as a human-readable string. */
-export function formatAge(ageMs: number): string {
-  if (ageMs < 60_000) {
-    return 'just now';
-  }
-  if (ageMs < 3_600_000) {
-    const minutes = Math.floor(ageMs / 60_000);
-    return `${minutes} minutes ago`;
-  }
-  if (ageMs < 86_400_000) {
-    const hours = Math.floor(ageMs / 3_600_000);
-    return `${hours} hours ago`;
-  }
-  if (ageMs < 7 * 86_400_000) {
-    const days = Math.floor(ageMs / 86_400_000);
-    return `${days} days ago`;
-  }
-  const weeks = Math.floor(ageMs / (7 * 86_400_000));
-  return `${weeks} weeks ago`;
+const pad = (n: number) => String(n).padStart(2, '0');
+
+/** MM-DD in UTC. */
+export function monthDay(ms: number): string {
+  const d = new Date(ms);
+  return `${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
 }
 
-/** Format an ISO 8601 date as MM-DD. */
-export function formatDate(iso: string): string {
-  const date = new Date(iso);
-  if (isNaN(date.getTime())) {
-    throw new RangeError(`Invalid date: ${iso}`);
-  }
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  return `${month}-${day}`;
+export function hhmm(ms: number): string {
+  const d = new Date(ms);
+  return `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
 }
 
-/** Format an ISO 8601 datetime as MM-DD HH:MM (UTC). */
-export function formatDatetime(iso: string): string {
-  const date = new Date(iso);
-  if (isNaN(date.getTime())) {
-    throw new RangeError(`Invalid date: ${iso}`);
-  }
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(date.getUTCDate()).padStart(2, '0');
-  const hours = String(date.getUTCHours()).padStart(2, '0');
-  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-  return `${month}-${day} ${hours}:${minutes}`;
+/** "5 min ago", "3 h ago", "12 d ago". */
+export function ago(ms: number, now: number): string {
+  const minutes = Math.max(0, Math.round((now - ms) / 60000));
+  if (minutes < 60) return `${minutes} min ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 48) return `${hours} h ago`;
+  return `${Math.round(hours / 24)} d ago`;
 }
 
-/** Truncate a string to maxLen characters. */
-export function truncate(s: string, maxLen: number): string {
-  return s.slice(0, maxLen);
+/** 1234 becomes 1.2k, 1500000 becomes 1.5M. */
+export function compact(n: number): string {
+  if (n < 1000) return String(n);
+  if (n < 1_000_000) return `${(n / 1000).toFixed(n < 10_000 ? 1 : 0)}k`;
+  return `${(n / 1_000_000).toFixed(1)}M`;
 }
 
-/** Right-align a string in width characters, padded with spaces on left. */
-export function padLeft(s: string, width: number): string {
-  return s.padStart(width, ' ');
-}
-
-/** Left-align a string in width characters, padded with spaces on right. */
-export function padRight(s: string, width: number): string {
-  return s.padEnd(width, ' ');
+/** Percent of a part in a whole with no decimals, "<1" for tiny shares. */
+export function percent(part: number, whole: number): string {
+  if (whole <= 0) return '0%';
+  const p = (part / whole) * 100;
+  return p > 0 && p < 1 ? '<1%' : `${Math.round(p)}%`;
 }

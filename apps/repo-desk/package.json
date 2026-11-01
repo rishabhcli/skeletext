@@ -4,7 +4,7 @@
   "license": "MIT",
   "private": true,
   "type": "module",
-  "description": "GitHub repository data as teletext pages, built on @skeletext/core",
+  "description": "GitHub repository status as teletext pages, built on @skeletext/core",
   "scripts": {
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json",
@@ -12,10 +12,5 @@
   },
   "dependencies": {
     "@skeletext/core": "*"
-  },
-  "devDependencies": {
-    "vitest": "^2.1.8",
-    "fast-check": "^3.13.2",
-    "esbuild": "^0.24.2"
   }
 }

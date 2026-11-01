@@ -1,0 +1,15 @@
+{
+ "full_name": "rishabhcli/skeletext",
+ "description": "Teletext page engine skeleton plus two live-data apps (earthquakes, GitHub repo status). Built with Kiro for Kiroween 2026, Skeleton Crew.",
+ "stargazers_count": 0,
+ "forks_count": 0,
+ "open_issues_count": 0,
+ "language": "TypeScript",
+ "license": {
+  "spdx_id": "MIT"
+ },
+ "pushed_at": "2026-11-01T00:21:37Z",
+ "default_branch": "main",
+ "archived": false,
+ "html_url": "https://github.com/rishabhcli/skeletext"
+}

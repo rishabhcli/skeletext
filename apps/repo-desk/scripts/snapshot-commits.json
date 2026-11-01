@@ -1,0 +1,262 @@
+[
+ {
+  "sha": "45de8241e5a1b295907905a87bcbb6ebe0efcfc4",
+  "commit": {
+   "message": "Kiro run E2 (repo-desk, qwen3-coder-next): partial output at stop, 19 minutes in; page layouts overlap because control cells were not counted",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-11-01T00:21:35Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "ec0f7efea48e8aeee33f2d4bbe884f47ff211066",
+  "commit": {
+   "message": "Viewer: screen reader transcript, no live region on the clock",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T23:28:26Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "e8805b13fdeb4f65eb168f8b32a881d89a725ba3",
+  "commit": {
+   "message": "quake-desk: dump-page script for MCP inspection, spec status note; deployed",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T23:17:46Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "2572a57d2c319c2f225ac23a254a3e4ce37b78e9",
+  "commit": {
+   "message": "quake-desk app by hand: feed, pages, provider, viewer wiring, tests, real USGS snapshots as fixtures",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T23:16:05Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "3bc4db751380fe8a01978599c5265d93a1ef9e40",
+  "commit": {
+   "message": "Renderer: no seams between contiguous mosaic blocks",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T23:02:58Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "0058db82915b8ba2a7e95e9a0b1b05b1c36b5087",
+  "commit": {
+   "message": "Draft write-up of how Kiro was used (honest account so far)",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T22:52:21Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "e2db8f197e9f98f3859b2f17027ebc355dfea4f1",
+  "commit": {
+   "message": "teletext-mcp server written by hand, 18 tests, stdio proof; spec REQ-2.1 corrected to the real MCP wire format",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T22:50:18Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "5ad22f13db79beb0383618d3aaa5b0a901a745e4",
+  "commit": {
+   "message": "README draft; tick T-1.1",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T22:48:50Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "1774fe907eb95561101d01d59488926501012bb0",
+  "commit": {
+   "message": "Hand-written builder, system pages and viewer with property tests; tick skeleton-core tasks with status note",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T22:48:31Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "74ff2acbab90cb78c51bd28ed382280e28087dcf",
+  "commit": {
+   "message": "Hand-written SVG renderer with property tests; barrel exports",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T22:45:23Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "48b5a4841f51b1473cd9b38eb5b4f6e787cf0834",
+  "commit": {
+   "message": "Add steering doc with TypeScript and property-test gotchas learned from failed runs; keep prompts",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T22:43:31Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "2238d630a773dcddc6cd9da0c4e37e1d29225110",
+  "commit": {
+   "message": "Fix tsc errors and harden store/fastext/codec by hand; add navigation and hardening property tests; trim agent resources to save credits",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T22:42:38Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "33f273eb480f49f80ecd65915a2b13b4193efb06",
+  "commit": {
+   "message": "Kiro run D3 (v3 engine, agent teletext-builder, model qwen3-coder-next)",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T22:40:50Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "a24100d32c46d36004486429f505bbababa11331",
+  "commit": {
+   "message": "Rewrite interpreter by hand after review of Kiro output; new tests; review notes",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T22:25:37Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "c499a397ea7b3f8b55eeed4fb89605897dd034b4",
+  "commit": {
+   "message": "Kiro run D2 (v3 engine, agent teletext-builder, model claude-haiku-4.5)",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T22:22:41Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "1f5283eff88b6e82ef90fd1d48dbbd9bbba3da82",
+  "commit": {
+   "message": "Kiro run D1 (v3 engine, agent teletext-builder, model qwen3-coder-next)",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T18:06:03Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "a01d67fbcef292017f3bebb9af01a714052fd448",
+  "commit": {
+   "message": "Orchestrator fixes: agent read permission, stop-hook guard",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T17:35:57Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "764323fbbe6971ec29b5987f6883ceb49f3f4bb1",
+  "commit": {
+   "message": "Orchestrator fixes: agent read permission, stop-hook guard",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T17:34:52Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "5643cd046932040afc5260069a50073c178a9a1d",
+  "commit": {
+   "message": "Kiro run D0 (model auto)",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T17:31:43Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ },
+ {
+  "sha": "3efd5eb4e58c88d23c61a37401b8b29cbbdd3d58",
+  "commit": {
+   "message": "Kiro run B3: repo-desk and teletext-mcp specs",
+   "author": {
+    "name": "Rishabh Bansal",
+    "date": "2026-10-31T17:25:59Z"
+   }
+  },
+  "author": {
+   "login": "rishabhcli"
+  }
+ }
+]

@@ -1,48 +1,54 @@
-export interface RepoData {
+export interface RepoRef {
+  owner: string;
+  name: string;
+}
+
+export interface RepoInfo {
   fullName: string;
   description: string;
   stars: number;
   forks: number;
-  openIssues: number;
+  /** GitHub counts pull requests in this number. */
+  openIssuesAndPulls: number;
   language: string | null;
   license: string | null;
-  pushedAt: string;
+  pushedAt: number | null;
+  defaultBranch: string;
+  archived: boolean;
 }
 
 export interface CommitItem {
   sha: string;
-  date: string;
-  author: string;
   message: string;
+  author: string;
+  date: number;
 }
 
 export interface PullItem {
   number: number;
-  login: string;
   title: string;
+  author: string;
+  draft: boolean;
+  createdAt: number;
 }
 
 export interface IssueItem {
   number: number;
-  login: string;
   title: string;
+  author: string;
+  createdAt: number;
 }
 
 export interface RunItem {
   name: string;
-  branch: string;
-  status: 'queued' | 'in_progress' | 'completed';
+  status: string;
   conclusion: string | null;
-  updatedAt: string;
+  branch: string;
+  runNumber: number;
+  createdAt: number;
 }
 
-export interface AppState {
-  owner: string;
+export interface LanguageShare {
   name: string;
-  repo: RepoData | null;
-  commits: CommitItem[] | null;
-  pulls: PullItem[] | null;
-  issues: IssueItem[] | null;
-  runs: RunItem[] | null;
-  languages: Record<string, number> | null;
+  bytes: number;
 }
