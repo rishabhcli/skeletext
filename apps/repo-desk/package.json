@@ -1,0 +1,21 @@
+{
+  "name": "repo-desk",
+  "version": "0.1.0",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "description": "GitHub repository data as teletext pages, built on @skeletext/core",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json",
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@skeletext/core": "*"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.8",
+    "fast-check": "^3.13.2",
+    "esbuild": "^0.24.2"
+  }
+}
